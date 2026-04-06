@@ -10,10 +10,12 @@ import BlogPage from './pages/BlogPage.jsx'
 import ContactPage from './pages/ContactPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster position='top-right' />
       <BrowserRouter>
         <Navbar />
         <Routes>
