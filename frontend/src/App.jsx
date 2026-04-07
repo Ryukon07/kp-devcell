@@ -1,30 +1,24 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext.jsx'
 import Navbar from './components/Navbar.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import HomePage from './pages/HomePage.jsx'
-import TeamPage from './pages/TeamPage.jsx'
-import ProjectsPage from './pages/ProjectsPage.jsx'
 import EventsPage from './pages/EventsPage.jsx'
-import BlogPage from './pages/BlogPage.jsx'
-import ContactPage from './pages/ContactPage.jsx'
+import ResourcesPage from './pages/ResourcesPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
-import { Toaster } from 'react-hot-toast'
 
 function App() {
   return (
     <AuthProvider>
-      <Toaster position='top-right' />
+      <Toaster position="top-right" />
       <BrowserRouter>
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/events" element={<EventsPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={
             <ProtectedRoute>

@@ -1,13 +1,11 @@
+import './config.js'
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import membersRouter from './routes/members.js'
-import projectsRouter from './routes/projects.js'
 import eventsRouter from './routes/events.js'
-import postsRouter from './routes/posts.js'
-
-dotenv.config()
+import announcementsRouter from './routes/announcements.js'
+import adminAccessRouter from './routes/adminAccess.js'
 
 const app = express()
 
@@ -19,13 +17,13 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/members', membersRouter)
-app.use('/api/projects', projectsRouter)
 app.use('/api/events', eventsRouter)
-app.use('/api/posts', postsRouter)
+app.use('/api/announcements', announcementsRouter)
+app.use('/api/admin-access', adminAccessRouter)
 
 mongoose.connect(process.env.MONGO_URI, {
-    tls : true,
-    tlsInsecure : true
+  tls: true,
+  tlsInsecure: true
 })
   .then(() => {
     console.log('MongoDB connected')
