@@ -41,4 +41,14 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 })
 
+// GET all announcements including inactive (admin only)
+router.get('/all', verifyToken, async (req, res) => {
+  try {
+    const announcements = await Announcement.find().sort({ createdAt: -1 })
+    res.json(announcements)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
+  }
+})
+
 export default router
