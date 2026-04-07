@@ -67,6 +67,13 @@ function LoginPage() {
           </button>
         </form>
 
+        <p className="text-center text-gray-500 text-sm mt-4">
+          First time?{' '}
+          <span className="text-purple-400 cursor-pointer hover:text-purple-300">
+            Change your password
+          </span>
+        </p>
+
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import express from 'express'
 import Member from '../models/Member.js'
 import verifyToken from '../middleware/auth.js'
+import admin from 'firebase-admin'
 
 const router = express.Router()
 
@@ -53,6 +54,18 @@ router.put('/:id', verifyToken, async (req, res) => {
 // DELETE member — admin only
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
+    const member = await Member.findById(req.params.id)
+    if (!member) return res.status(404).json({ message: 'Member not found' })
+
+    // If member has admin access, delete their Firebase account first
+    if (member.hasAdminAccess && member.firebaseUid) {
+      try {
+        await admin.auth().deleteUser(member.firebaseUid)
+      } catch (firebaseErr) {
+        console.log('Firebase delete error:', firebaseErr.message)
+      }
+    }
+
     await Member.findByIdAndDelete(req.params.id)
     res.json({ message: 'Member deleted' })
   } catch (err) {

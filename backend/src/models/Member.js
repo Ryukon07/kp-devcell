@@ -32,6 +32,18 @@ const memberSchema = new mongoose.Schema({
   isCore: {
     type: Boolean,
     default: false
+  },
+  hasAdminAccess: {
+    type: Boolean,
+    default: false
+  },
+  firebaseUid: {
+    type: String,
+    default: ''
+  },
+  adminEmail: {
+    type: String,
+    default: ''
   }
 }, { timestamps: true })
 
