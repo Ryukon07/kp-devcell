@@ -1,15 +1,18 @@
 import admin from 'firebase-admin'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
 
-if (!admin.apps.length) {
-  try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    })
-  } catch (err) {
-    console.error('Firebase init error:', err.message)
-  }
-}
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+const serviceAccount = JSON.parse(
+  readFileSync(join(__dirname, '../../serviceAccount.json'), 'utf8')
+)
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+})
 
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization
