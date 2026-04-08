@@ -9,11 +9,7 @@ import adminAccessRouter from './routes/adminAccess.js'
 
 const app = express()
 
-app.use(cors({
-  origin: 'https://kp-devcell.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors())
 app.use(express.json())
 
 app.get('/', (req, res) => {
