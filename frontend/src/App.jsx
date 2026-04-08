@@ -8,11 +8,13 @@ import EventsPage from './pages/EventsPage.jsx'
 import ResourcesPage from './pages/ResourcesPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
+import AnnouncementPopup from './components/AnnouncementPopup.jsx'
 
 function App() {
   return (
     <AuthProvider>
       <Toaster position="top-right" />
+      <AnnouncementPopup />
       <BrowserRouter>
         <Navbar />
         <Routes>
