@@ -7,6 +7,7 @@ import Footer         from '../components/home/Footer'
 import { Ticker }     from '../components/shared'
 import CustomScrollbar from '../components/CustomScrollbar'
 import MembersSection from '../components/home/MembersSection'
+import Connect from '../components/home/Connect'
 
 const TICKER_ITEMS = [
   'Web Development', 'System Design', 'Open Source', 'Hackathons',
@@ -29,6 +30,7 @@ export default function HomePage() {
       <Team />
       <MembersSection />
       <Projects />
+      <Connect />
       <Footer />
     </div>
   )
