@@ -1,10 +1,11 @@
 import { C } from '../constants/theme'
-import Hero     from '../components/home/Hero'
-import About    from '../components/home/About'
-import Team     from '../components/home/Team'
-import Projects from '../components/home/Projects'
-import Footer   from '../components/home/Footer'
-import { Ticker } from '../components/shared'
+import Hero           from '../components/home/Hero'
+import About          from '../components/home/About'
+import Team           from '../components/home/Team'
+import Projects       from '../components/home/Projects'
+import Footer         from '../components/home/Footer'
+import { Ticker }     from '../components/shared'
+import CustomScrollbar from '../components/CustomScrollbar'
 
 const TICKER_ITEMS = [
   'Web Development', 'System Design', 'Open Source', 'Hackathons',
@@ -20,10 +21,7 @@ export default function HomePage() {
       fontFamily: '"Inter", system-ui, sans-serif',
       overflowX: 'hidden',
     }}>
-      {/*
-        MatrixRain now lives INSIDE Hero (position:absolute, clipped by overflow:hidden).
-        No more fixed full-page canvas — rain only falls in the hero section.
-      */}
+      <CustomScrollbar />   
       <Hero />
       <Ticker items={TICKER_ITEMS} />
       <About />

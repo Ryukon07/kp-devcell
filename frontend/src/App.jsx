@@ -9,6 +9,7 @@ import ResourcesPage from './pages/ResourcesPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import AnnouncementPopup from './components/AnnouncementPopup.jsx'
+import CustomScrollbar from './components/CustomScrollbar'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Toaster position="top-right" />
       <AnnouncementPopup />
       <BrowserRouter>
+      <CustomScrollbar />
         <Navbar />
           <Routes>
             <Route path="/" element={<HomePage />} />
