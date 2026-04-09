@@ -17,17 +17,17 @@ function App() {
       <AnnouncementPopup />
       <BrowserRouter>
         <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminPage />
-            </ProtectedRoute>
-          } />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminPage />
+              </ProtectedRoute>
+            } />
+          </Routes>  
       </BrowserRouter>
     </AuthProvider>
   )
