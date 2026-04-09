@@ -135,7 +135,7 @@ function AnnouncementCard({ announcement, floatDelay }) {
             color: C.cyan, fontSize: '10px',
             letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500,
           }}>
-            announce
+            announcement
           </span>
         </div>
         <span style={{ color: '#4B5563', fontSize: '10px' }}>{date}</span>
@@ -359,7 +359,7 @@ export default function Hero() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
-              just code.
+              Fuck OFF.
             </span>
           </motion.h1>
 
