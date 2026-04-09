@@ -7,8 +7,32 @@ const emptyForm = {
   title: '',
   description: '',
   date: '',
-  type: 'upcoming',
   image_url: ''
+}
+
+const parseLocalDate = (dateString) => {
+  const [year, month, day] = dateString.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+const getLocalDateKey = (dateValue) => {
+  if (typeof dateValue === 'string' && dateValue.length >= 10) {
+    return dateValue.slice(0, 10)
+  }
+
+  const date = new Date(dateValue)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const getEventTypeFromDate = (dateValue) => {
+  const eventDay = getLocalDateKey(dateValue)
+  const todayDay = getLocalDateKey(new Date())
+
+  if (eventDay === todayDay) return 'today'
+  return eventDay > todayDay ? 'upcoming' : 'past'
 }
 
 function EventsAdmin() {
@@ -22,7 +46,10 @@ function EventsAdmin() {
   const fetchEvents = async () => {
     try {
       const res = await api.get('/events')
-      setEvents(res.data)
+      setEvents(res.data.map(event => ({
+        ...event,
+        type: getEventTypeFromDate(event.date),
+      })))
     } catch (err) {
       toast.error('Failed to fetch events')
     }
@@ -37,12 +64,26 @@ function EventsAdmin() {
     e.preventDefault()
     setLoading(true)
     try {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const eventDate = parseLocalDate(form.date)
+      eventDate.setHours(0, 0, 0, 0)
+
+      const autoType =
+        eventDate.getTime() === today.getTime()
+          ? 'today'
+          : eventDate > today
+            ? 'upcoming'
+            : 'past'
+
+      const payload = { ...form, type: autoType }
       const config = await getToken()
       if (editingId) {
-        await api.put(`/events/${editingId}`, form, config)
+        await api.put(`/events/${editingId}`, payload, config)
         toast.success('Event updated')
       } else {
-        await api.post('/events', form, config)
+        await api.post('/events', payload, config)
         toast.success('Event added')
       }
       setForm(emptyForm)
@@ -84,6 +125,12 @@ function EventsAdmin() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
+  const getTypeClassName = (type) => {
+    if (type === 'upcoming') return 'text-green-400'
+    if (type === 'today') return 'text-amber-400'
+    return 'text-gray-400'
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
@@ -114,19 +161,6 @@ function EventsAdmin() {
               required
               className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white outline-none focus:border-purple-500 transition-colors text-sm"
             />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-400 text-sm">Type</label>
-            <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white outline-none focus:border-purple-500 transition-colors text-sm"
-            >
-              <option value="upcoming">Upcoming</option>
-              <option value="past">Past</option>
-            </select>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -185,7 +219,7 @@ function EventsAdmin() {
                   <p className="text-white font-medium">{event.title}</p>
                   <p className="text-gray-400 text-sm">
                     {new Date(event.date).toLocaleDateString()} ·{' '}
-                    <span className={event.type === 'upcoming' ? 'text-green-400' : 'text-gray-400'}>
+                    <span className={getTypeClassName(event.type)}>
                       {event.type}
                     </span>
                   </p>

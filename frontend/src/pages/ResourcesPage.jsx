@@ -48,7 +48,7 @@ const resources = [
     category: "Dev Tools",
     path: "dev-tools",
     description: "Git, Docker, Linux and other tools",
-    color: "#FBBF24",
+    color: "#14B8A6",
     items: [
       { title: "Git & GitHub Guide", type: "PDF", link: "#" },
       { title: "Docker Introduction", type: "PPT", link: "#" },
@@ -66,9 +66,9 @@ const TYPE_META = {
   },
   PPT: {
     label: "PPT",
-    bg: "rgba(251,191,36,0.1)",
-    color: "#FBBF24",
-    border: "rgba(251,191,36,0.25)",
+    bg: "transparent",
+    color: C.cyan,
+    border: "rgba(20,184,166,0.25)",
   },
   VIDEO: {
     label: "VID",
@@ -322,17 +322,29 @@ function FolderCard({ resource, index, isOpen, onToggle }) {
 
         {/* Chevron */}
         <motion.span
-          animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{
-            color: C.muted,
-            fontSize: "12px",
-            flexShrink: 0,
-            display: "inline-block",
-          }}
-        >
-          ▶
-        </motion.span>
+  animate={{ rotate: isOpen ? 90 : 0 }}
+  transition={{ duration: 0.2 }}
+  style={{
+    color: isOpen ? C.cyan : "#4B5563",
+    flexShrink: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    transition: "color 0.2s ease",
+  }}
+>
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 18 15 12 9 6" />
+  </svg>
+</motion.span>
       </motion.button>
 
       {/* File list */}

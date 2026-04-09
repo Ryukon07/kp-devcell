@@ -4,6 +4,20 @@ import verifyToken from '../middleware/auth.js'
 
 const router = express.Router()
 
+const getEventTypeFromDate = (dateValue) => {
+  const eventDate = new Date(dateValue)
+  if (Number.isNaN(eventDate.getTime())) {
+    throw new Error('Invalid event date')
+  }
+
+  const today = new Date()
+  const eventDay = eventDate.toISOString().slice(0, 10)
+  const todayDay = today.toISOString().slice(0, 10)
+
+  if (eventDay === todayDay) return 'today'
+  return eventDay > todayDay ? 'upcoming' : 'past'
+}
+
 // GET all events
 router.get('/', async (req, res) => {
   try {
@@ -27,7 +41,11 @@ router.get('/upcoming', async (req, res) => {
 // POST create event (admin only)
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const event = new Event(req.body)
+    const payload = {
+      ...req.body,
+      type: getEventTypeFromDate(req.body.date)
+    }
+    const event = new Event(payload)
     const saved = await event.save()
     res.status(201).json(saved)
   } catch (err) {
@@ -38,9 +56,14 @@ router.post('/', verifyToken, async (req, res) => {
 // PUT update event (admin only)
 router.put('/:id', verifyToken, async (req, res) => {
   try {
+    const payload = {
+      ...req.body,
+      type: getEventTypeFromDate(req.body.date)
+    }
+
     const updated = await Event.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      payload,
       { new: true }
     )
     res.json(updated)

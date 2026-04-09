@@ -15,6 +15,26 @@ const C = {
   pink: '#ec4899',
 }
 
+function getLocalDateKey(dateValue) {
+  if (typeof dateValue === 'string' && dateValue.length >= 10) {
+    return dateValue.slice(0, 10)
+  }
+
+  const date = new Date(dateValue)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getEventTypeFromDate(dateValue) {
+  const eventDay = getLocalDateKey(dateValue)
+  const todayDay = getLocalDateKey(new Date())
+
+  if (eventDay === todayDay) return 'today'
+  return eventDay > todayDay ? 'upcoming' : 'past'
+}
+
 // ── Typewriter hook ───────────────────────────────────────────
 function useTypewriter(text, speed = 40, startDelay = 300) {
   const [displayed, setDisplayed] = useState('')
@@ -134,10 +154,11 @@ function PageHeader() {
 // ── Filter tabs ───────────────────────────────────────────────
 function FilterBar({ filter, setFilter, counts }) {
   const filters = [
-    { key: 'all', label: 'all', icon: '*' },
-    { key: 'upcoming', label: 'upcoming', icon: '↑' },
-    { key: 'past', label: 'past', icon: '✓' },
-  ]
+  { key: 'all', label: 'all', icon: '*' },
+  { key: 'upcoming', label: 'upcoming', icon: '↑' },
+  { key: 'today', label: 'today', icon: '●' },
+  { key: 'past', label: 'past', icon: '✓' },
+]
 
   return (
     <motion.div
@@ -198,6 +219,33 @@ function FilterBar({ filter, setFilter, counts }) {
 // ── Event type badge ──────────────────────────────────────────
 function TypeBadge({ type }) {
   const isUpcoming = type === 'upcoming'
+  const isToday = type === 'today'
+  const isPast = type === 'past'
+
+  const badgeBackground = isUpcoming
+    ? 'rgba(34,197,94,0.1)'
+    : isToday
+      ? 'rgba(245,158,11,0.12)'
+      : 'rgba(139,92,246,0.1)'
+
+  const badgeBorder = isUpcoming
+    ? 'rgba(34,197,94,0.25)'
+    : isToday
+      ? 'rgba(245,158,11,0.28)'
+      : 'rgba(139,92,246,0.25)'
+
+  const badgeColor = isUpcoming
+    ? C.green
+    : isToday
+      ? '#f59e0b'
+      : C.purple
+
+  const dotColor = isUpcoming
+    ? C.green
+    : isToday
+      ? '#f59e0b'
+      : C.purple
+
   return (
     <span style={{
       display: 'inline-flex',
@@ -209,17 +257,17 @@ function TypeBadge({ type }) {
       letterSpacing: '0.08em',
       padding: '3px 10px',
       borderRadius: '20px',
-      backgroundColor: isUpcoming ? 'rgba(34,197,94,0.1)' : 'rgba(139,92,246,0.1)',
-      border: `1px solid ${isUpcoming ? 'rgba(34,197,94,0.25)' : 'rgba(139,92,246,0.25)'}`,
-      color: isUpcoming ? C.green : C.purple,
+      backgroundColor: badgeBackground,
+      border: `1px solid ${badgeBorder}`,
+      color: badgeColor,
       flexShrink: 0,
     }}>
       <motion.span
-        animate={isUpcoming ? { opacity: [1, 0.3, 1] } : {}}
+        animate={!isPast ? { opacity: [1, 0.3, 1] } : {}}
         transition={{ duration: 1.8, repeat: Infinity }}
         style={{
           width: '5px', height: '5px', borderRadius: '50%',
-          backgroundColor: isUpcoming ? C.green : C.purple,
+          backgroundColor: dotColor,
           display: 'inline-block',
         }}
       />
@@ -512,8 +560,11 @@ function StatsBar({ events }) {
           {' '}past
         </span>
         <span style={{ color: '#374151' }}>·</span>
-        <span style={{ color: '#4b5563' }}>
-          {events.length} total
+        <span style={{ color: C.muted }}>
+          <span style={{ color: '#f59e0b' }}>
+            {events.filter(e => e.type === 'today').length}
+          </span>
+          {' '}today
         </span>
       </div>
     </motion.div>
@@ -533,7 +584,10 @@ function EventsPage() {
   const fetchEvents = async () => {
     try {
       const res = await api.get('/events')
-      setEvents(res.data)
+      setEvents(res.data.map(event => ({
+        ...event,
+        type: getEventTypeFromDate(event.date),
+      })))
     } catch (err) {
       console.error('Failed to fetch events')
     } finally {
@@ -549,6 +603,7 @@ function EventsPage() {
   const counts = {
     all: events.length,
     upcoming: events.filter(e => e.type === 'upcoming').length,
+    today: events.filter(e => e.type === 'today').length,
     past: events.filter(e => e.type === 'past').length,
   }
 

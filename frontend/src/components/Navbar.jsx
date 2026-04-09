@@ -254,9 +254,10 @@ export default function Navbar() {
                     {/* Icon */}
                     <motion.div
                       animate={{
-                        rotate: isHovered ? [-10, 10, 0] : 0,
-                        scale: isHovered ? 1.2 : 1,
-                      }}
+  rotate: isHovered ? [-10, 10, 0] : 0,
+  scale: isHovered ? 1.2 : 1,
+  y: isHovered || isActive ? -5 : 0,
+}}
                       transition={{ duration: 0.35, ease: 'easeInOut' }}
                       style={{ position: 'relative', zIndex: 1 }}
                     >
@@ -265,21 +266,23 @@ export default function Navbar() {
 
                     {/* Label slides up on hover */}
                     <motion.span
-                      animate={{
-                        opacity: isHovered || isActive ? 1 : 0,
-                        y: isHovered || isActive ? 0 : 4,
-                      }}
-                      transition={{ duration: 0.2 }}
-                      style={{
-                        position: 'relative', zIndex: 1,
-                        fontSize: '7.5px', fontWeight: 500,
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        fontFamily: '"Fira Code", monospace',
-                      }}
-                    >
-                      {item.label}
-                    </motion.span>
+  animate={{
+    opacity: isHovered || isActive ? 1 : 0,
+    y: isHovered || isActive ? 0 : 4,
+  }}
+  transition={{ duration: 0.2 }}
+  style={{
+    position: 'absolute',
+    bottom: '7px',
+    zIndex: 1,
+    fontSize: '7.5px', fontWeight: 500,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    fontFamily: '"Fira Code", monospace',
+  }}
+>
+  {item.label}
+</motion.span>
                   </motion.div>
                 </Link>
 

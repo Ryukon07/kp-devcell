@@ -15,7 +15,7 @@ const eventSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['upcoming', 'past'],
+    enum: ['upcoming', 'past', 'today'],
     required: true
   },
   image_url: {
