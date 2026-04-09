@@ -21,7 +21,7 @@ export default function HomePage() {
       fontFamily: '"Inter", system-ui, sans-serif',
       overflowX: 'hidden',
     }}>
-      <CustomScrollbar />   
+      <CustomScrollbar />
       <Hero />
       <Ticker items={TICKER_ITEMS} />
       <About />

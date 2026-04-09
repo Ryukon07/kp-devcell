@@ -8,14 +8,14 @@ import EventsPage from './pages/EventsPage.jsx'
 import ResourcesPage from './pages/ResourcesPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
-import AnnouncementPopup from './components/AnnouncementPopup.jsx'
+// import AnnouncementPopup from './components/AnnouncementPopup.jsx'
 import CustomScrollbar from './components/CustomScrollbar'
 
 function App() {
   return (
     <AuthProvider>
       <Toaster position="top-right" />
-      <AnnouncementPopup />
+      {/* <AnnouncementPopup /> */}
       <BrowserRouter>
       <CustomScrollbar />
         <Navbar />

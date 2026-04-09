@@ -90,7 +90,7 @@ function AnnouncementsAdmin() {
           {editingId ? 'Edit Announcement' : 'New Announcement'}
         </h2>
         <p className="text-gray-400 text-sm mb-6">
-          Active announcements will appear as a popup to all visitors.
+          Active announcements float on the hero section of the homepage as clickable cards. Up to 3 active announcements are shown at a time.
         </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -129,7 +129,7 @@ function AnnouncementsAdmin() {
               className="w-4 h-4 accent-purple-600"
             />
             <label className="text-gray-400 text-sm">
-              Active — show as popup to visitors
+              Active — show on homepage hero
             </label>
           </div>
 
