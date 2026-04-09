@@ -135,13 +135,20 @@ export default function Navbar() {
             {/* Inner */}
             <div style={{
               position: 'absolute', inset: '3px', borderRadius: '50%',
-              background: `linear-gradient(135deg, ${C.cyan}, ${C.purple})`,
+              // background: `linear-gradient(135deg, ${C.cyan}, ${C.purple})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '13px', fontWeight: 700, color: '#fff',
-              letterSpacing: '0.05em', zIndex: 2,
-              fontFamily: '"Fira Code", monospace',
+              zIndex: 2,
+              overflow: 'hidden',
             }}>
-              KP
+              <img
+                src="/logo.png"
+                alt="KP Dev Cell logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
             </div>
           </motion.div>
         </Link>

@@ -28,14 +28,21 @@ export default function Footer() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '50%',
-            background: `linear-gradient(135deg, ${C.cyan}, ${C.purple})`,
+            background: 'transparent',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '11px', fontWeight: 800, color: '#fff',
-            userSelect: 'none',
+            userSelect: 'none', overflow: 'hidden',
           }}>
-            KP
+            <img
+              src="/logo.png"
+              alt="KP Dev Cell logo"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
           </div>
-          <span style={{ color: C.fg, fontWeight: 700, fontSize: '15px' }}>KP Dev Cell</span>
+          <span style={{ color: C.fg, fontWeight: 700, fontSize: '15px', marginLeft: '-7px' }}>KP Dev Cell</span>
         </div>
         <p style={{ color: C.muted, fontSize: '12px', margin: 0 }}>
           Kammand Prompt Club — IIT Mandi
@@ -68,7 +75,7 @@ export default function Footer() {
         margin: 0,
       }}>
         © 2025 KP Dev Cell · Built by{' '}
-        <span style={{ color: C.cyan }}>the club</span>
+        <span style={{ color: C.cyan }}>the DeCoders</span>
       </p>
     </footer>
   )
