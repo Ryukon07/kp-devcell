@@ -101,7 +101,7 @@ function MembersAdmin() {
           {[
             { label: 'Name', name: 'name', type: 'text', required: true },
             { label: 'Role', name: 'role', type: 'text', required: true },
-            { label: 'Batch', name: 'batch', type: 'text', required: true },
+            { label: 'Team', name: 'batch', type: 'text', required: true },
             { label: 'Photo URL', name: 'photo_url', type: 'text' },
             { label: 'GitHub URL', name: 'github', type: 'text' },
             { label: 'LinkedIn URL', name: 'linkedin', type: 'text' },
@@ -128,17 +128,6 @@ function MembersAdmin() {
               rows={3}
               className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white outline-none focus:border-purple-500 transition-colors text-sm resize-none"
             />
-          </div>
-
-          <div className="col-span-2 flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="isCore"
-              checked={form.isCore}
-              onChange={handleChange}
-              className="w-4 h-4 accent-purple-600"
-            />
-            <label className="text-gray-400 text-sm">Core team member</label>
           </div>
 
           <div className="col-span-2 flex gap-3">
@@ -172,7 +161,7 @@ function MembersAdmin() {
               <div key={member._id} className="flex items-center justify-between bg-gray-800 rounded-xl px-5 py-4">
                 <div>
                   <p className="text-white font-medium">{member.name}</p>
-                  <p className="text-gray-400 text-sm">{member.role} · Batch {member.batch}</p>
+                  <p className="text-gray-400 text-sm">{member.role} · {member.batch}</p>
                 </div>
                 <div className="flex gap-2">
                   <button

@@ -271,7 +271,6 @@ export default function Hero() {
           alignItems: 'center',
           position: 'relative',
           overflow: 'hidden',
-          y: heroY,
           opacity: heroOpacity,
         }}
       >
