@@ -33,6 +33,8 @@ function HomeLoader({ progress }) {
     []
   )
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 500;
+
   return (
     <>
       <style>{`
@@ -85,7 +87,7 @@ function HomeLoader({ progress }) {
           background: 'linear-gradient(180deg, rgba(5,8,13,0.8), rgba(5,8,13,0.95))',
           backdropFilter: 'blur(5px)',
           boxShadow: '0 12px 42px rgba(0,0,0,0.48), inset 0 0 24px rgba(20,184,166,0.08)',
-          padding: '22px 20px 18px',
+          padding: isMobile ? '16px 14px 14px' : '22px 20px 18px',
         }}>
           <div style={{
             display: 'flex',
@@ -104,16 +106,16 @@ function HomeLoader({ progress }) {
           </div>
 
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '130px 1fr',
-            gap: 18,
-            alignItems: 'center',
+            display: 'flex',
+flexDirection: isMobile ? 'column' : 'row',
+alignItems: 'center',
+gap: isMobile ? 10 : 16,
           }}>
             <div style={{
               position: 'relative',
-              width: 110,
-              height: 110,
-              margin: '0 auto',
+              width: isMobile ? 72 : 110,
+height: isMobile ? 72 : 110,
+              margin: isMobile ? '0 auto 4px' : '0 auto',
             }}>
               <div style={{
                 position: 'absolute',

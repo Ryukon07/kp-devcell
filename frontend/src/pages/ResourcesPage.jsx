@@ -104,6 +104,9 @@ function ResourcesBootLoader({ progress }) {
     [],
   );
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 500;
+  
+
   return (
     <>
       <style>{`
@@ -141,7 +144,7 @@ function ResourcesBootLoader({ progress }) {
             border: `1px solid ${C.border}`,
             borderRadius: 16,
             background: "rgba(9,13,20,0.92)",
-            padding: "22px 20px 18px",
+            padding: isMobile ? '16px 14px 14px' : '22px 20px 18px',
             boxShadow: "0 12px 42px rgba(0,0,0,0.48)",
           }}
         >
@@ -162,18 +165,18 @@ function ResourcesBootLoader({ progress }) {
 
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "150px 1fr",
-              gap: 16,
-              alignItems: "center",
+              display: 'flex',
+flexDirection: isMobile ? 'column' : 'row',
+alignItems: 'center',
+gap: isMobile ? 10 : 16,
             }}
           >
             <div
               style={{
                 position: "relative",
-                width: 132,
-                height: 126,
-                margin: "0 auto",
+                width: isMobile ? 80 : 132,
+height: isMobile ? 76 : 126,
+                margin: isMobile ? '0 auto 4px' : '0 auto',
                 borderRadius: 12,
                 border: `1px solid ${C.border}`,
                 background: "rgba(13,17,23,0.75)",
@@ -421,6 +424,7 @@ function FileRow({ item, index, folderColor }) {
 
 // ── Folder / Category card ────────────────────────────────────
 function FolderCard({ resource, index, isOpen, onToggle }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 500;
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -522,20 +526,22 @@ function FolderCard({ resource, index, isOpen, onToggle }) {
         </div>
 
         {/* Item count */}
-        <span
-          style={{
-            color: resource.color,
-            fontSize: "11px",
-            fontFamily: '"Fira Code", "Cascadia Code", monospace',
-            backgroundColor: `${resource.color}12`,
-            border: `1px solid ${resource.color}25`,
-            padding: "3px 10px",
-            borderRadius: "20px",
-            flexShrink: 0,
-          }}
-        >
-          {resource.items.length} files
-        </span>
+        {!isMobile && (
+  <span
+    style={{
+      color: resource.color,
+      fontSize: "11px",
+      fontFamily: '"Fira Code", "Cascadia Code", monospace',
+      backgroundColor: `${resource.color}12`,
+      border: `1px solid ${resource.color}25`,
+      padding: "3px 10px",
+      borderRadius: "20px",
+      flexShrink: 0,
+    }}
+  >
+    {resource.items.length} files
+  </span>
+)}
 
         {/* Chevron */}
         <motion.span

@@ -533,6 +533,8 @@ function EventsBootLoader({ progress }) {
   const pulseColor = rounded < 60 ? C.cyan : C.purple
   const sessionCode = useMemo(() => `EVT-${Math.random().toString(16).slice(2, 6).toUpperCase()}`, [])
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 500;
+
   return (
     <>
       <style>{`
@@ -564,7 +566,7 @@ function EventsBootLoader({ progress }) {
           width: 'min(92vw, 620px)',
           border: `1px solid ${C.border}`,
           borderRadius: 16,
-          padding: '22px 20px 18px',
+          padding: isMobile ? '16px 14px 14px' : '22px 20px 18px',
           background: 'rgba(9,13,21,0.9)',
           boxShadow: '0 12px 42px rgba(0,0,0,0.48)',
         }}>
@@ -581,8 +583,12 @@ function EventsBootLoader({ progress }) {
             <span>{sessionCode}</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 18, alignItems: 'center' }}>
-            <div style={{ position: 'relative', width: 118, height: 118, margin: '0 auto' }}>
+          <div style={{ display: 'flex',
+flexDirection: isMobile ? 'column' : 'row',
+alignItems: 'center',
+gap: isMobile ? 10 : 16, }}>
+            <div style={{ position: 'relative', width: isMobile ? 72 : 118,
+height: isMobile ? 72 : 118, margin: isMobile ? '0 auto 4px' : '0 auto', }}>
               <div style={{
                 position: 'absolute', inset: 0, borderRadius: '50%',
                 border: `1px solid ${C.border}`,
