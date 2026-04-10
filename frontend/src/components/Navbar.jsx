@@ -100,6 +100,10 @@ export default function Navbar() {
     setMobileOpen(false)
   }, [location.pathname])
 
+  if(location.pathname === "/admin" || location.pathname === "/login") {
+    return null
+  }
+
   // ── MOBILE LAYOUT ─────────────────────────────────────────
   if (isMobile) {
     return (
