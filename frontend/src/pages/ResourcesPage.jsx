@@ -142,7 +142,7 @@ function ResourcesBootLoader({ progress }) {
             borderRadius: 16,
             background: "rgba(9,13,20,0.92)",
             padding: "22px 20px 18px",
-            boxShadow: "0 18px 60px rgba(0,0,0,0.55)",
+            boxShadow: "0 12px 42px rgba(0,0,0,0.48)",
           }}
         >
           <div
@@ -248,7 +248,7 @@ function ResourcesBootLoader({ progress }) {
                     height: "100%",
                     transition: "width 120ms linear",
                     background: "linear-gradient(90deg, #14B8A6, #22d3ee)",
-                    boxShadow: "0 0 18px rgba(20,184,166,0.35)",
+                    boxShadow: "0 0 12px rgba(20,184,166,0.25)",
                   }}
                 />
               </div>

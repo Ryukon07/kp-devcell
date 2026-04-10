@@ -4,12 +4,25 @@ import { C } from '../../constants/theme'
 import { Section, SectionLabel } from '../shared'
 import { ScrambleText } from '../../hooks/useScramble.jsx'
 
+function usePageVisible() {
+  const [visible, setVisible] = useState(() => !document.hidden)
+
+  useEffect(() => {
+    const onVisibility = () => setVisible(!document.hidden)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
+  return visible
+}
+
 // ── Scrambled stat counter ────────────────────────────────────
 // The number itself counts up driven by scroll, with random digit
 // flicker before it resolves to the real value.
 function ScrambleStatCard({ value, label, suffix = '+', sectionRef, scrollStart, scrollEnd }) {
   const [displayVal, setDisplayVal] = useState('--')
   const [locked, setLocked]         = useState(false)
+  const isVisible = usePageVisible()
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -20,26 +33,27 @@ function ScrambleStatCard({ value, label, suffix = '+', sectionRef, scrollStart,
 
   useMotionValueEvent(progress, 'change', (p) => {
     if (p <= 0) {
-      setDisplayVal('--')
-      setLocked(false)
+      setDisplayVal(prev => (prev === '--' ? prev : '--'))
+      setLocked(prev => (prev ? false : prev))
       return
     }
     if (p >= 1) {
-      setDisplayVal(String(value))
-      setLocked(true)
+      const finalVal = String(value)
+      setDisplayVal(prev => (prev === finalVal ? prev : finalVal))
+      setLocked(prev => (prev ? prev : true))
       return
     }
     // During scramble: show random digits
-    setLocked(false)
+    setLocked(prev => (prev ? false : prev))
     const digits = String(value).length
-    setDisplayVal(
-      Array(digits).fill(0).map(() => Math.floor(Math.random() * 10)).join('')
-    )
+    const next = Array(digits).fill(0).map(() => Math.floor(Math.random() * 10)).join('')
+    setDisplayVal(prev => (prev === next ? prev : next))
   })
 
   // Flicker loop while not locked
   useEffect(() => {
-    if (locked) return
+    if (locked || !isVisible) return
+
     const id = setInterval(() => {
       const p = progress.get()
       if (p <= 0 || p >= 1) return
@@ -47,14 +61,14 @@ function ScrambleStatCard({ value, label, suffix = '+', sectionRef, scrollStart,
       // Partially reveal: left chars resolve based on progress
       const resolvedDigits = Math.floor(p * digits)
       const real = String(value).padStart(digits, '0')
-      setDisplayVal(
-        real.split('').map((d, i) =>
-          i < resolvedDigits ? d : String(Math.floor(Math.random() * 10))
-        ).join('')
-      )
-    }, 60)
+      const next = real.split('').map((d, i) =>
+        i < resolvedDigits ? d : String(Math.floor(Math.random() * 10))
+      ).join('')
+      setDisplayVal(prev => (prev === next ? prev : next))
+    }, 80)
+
     return () => clearInterval(id)
-  }, [locked, value, progress])
+  }, [locked, value, progress, isVisible])
 
   return (
     <motion.div

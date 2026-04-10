@@ -39,13 +39,15 @@ const terminalLines = [
 function TerminalTicker() {
   const [idx, setIdx] = useState(0)
   const idxRef = useRef(0)
-  useState(() => {
+
+  useEffect(() => {
     const id = setInterval(() => {
       idxRef.current = (idxRef.current + 1) % terminalLines.length
       setIdx(idxRef.current)
     }, 2200)
+
     return () => clearInterval(id)
-  })
+  }, [])
 
   return (
     <div style={{ width: '100%', overflow: 'hidden', padding: '2px 0', textAlign: 'center' }}>

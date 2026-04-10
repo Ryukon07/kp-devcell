@@ -20,9 +20,10 @@ const SCRAMBLE_CHARS = '01{}[]<>/\\=+-*&%$#@!'
 export function useScramble(text, sectionRef, startOffset = 0, endOffset = 0.45) {
   const [output, setOutput]       = useState(() => text.split('').map(() => ' '))
   const [resolved, setResolved]   = useState(0)   // how many chars are locked
-  const flickerRef                = useRef(null)
   const resolvedRef               = useRef(0)
   const textRef                   = useRef(text)
+  const lastFrameTimeRef          = useRef(0)
+  const frameIntervalMs           = 1000 / 30
 
   // Re-sync if text prop changes
   useEffect(() => { textRef.current = text }, [text])
@@ -41,14 +42,22 @@ export function useScramble(text, sectionRef, startOffset = 0, endOffset = 0.45)
 
   useMotionValueEvent(resolvedCount, 'change', (latest) => {
     const n = Math.floor(Math.min(latest, text.length))
-    resolvedRef.current = n
-    setResolved(n)
+    if (n !== resolvedRef.current) {
+      resolvedRef.current = n
+      setResolved(n)
+    }
   })
 
   // Flicker loop for unresolved characters
   useEffect(() => {
     let id
-    const flicker = () => {
+    const flicker = (ts) => {
+      if (ts - lastFrameTimeRef.current < frameIntervalMs) {
+        id = requestAnimationFrame(flicker)
+        return
+      }
+      lastFrameTimeRef.current = ts
+
       const t = textRef.current
       const n = resolvedRef.current
       setOutput(

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { motion, AnimatePresence, useInView, useMotionValue, useTransform, animate } from 'framer-motion'
 import api from '../api.js'
 import { claimPageBootLoader } from '../utils/bootLoaderGate.js'
 
@@ -283,7 +283,23 @@ function TypeBadge({ type }) {
 function EventCard({ event, index }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
-  const [hovered, setHovered] = useState(false)
+  const hover = useMotionValue(0)
+  const borderColor = useTransform(hover, [0, 1], [C.border, 'rgba(20,184,166,0.3)'])
+  const cardShadow = useTransform(
+    hover,
+    [0, 1],
+    ['0 2px 12px rgba(0,0,0,0.2)', '0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(20,184,166,0.08)']
+  )
+  const dateBg = useTransform(
+    hover,
+    [0, 1],
+    ['rgba(13,17,23,0.5)', 'linear-gradient(180deg, rgba(20,184,166,0.06), rgba(20,184,166,0.02))']
+  )
+  const imageFilter = useTransform(
+    hover,
+    [0, 1],
+    ['brightness(0.6) saturate(0.7)', 'brightness(0.9)']
+  )
 
   const date = new Date(event.date)
   const day = date.toLocaleDateString('en-IN', { day: '2-digit' })
@@ -297,36 +313,31 @@ function EventCard({ event, index }) {
       initial={{ opacity: 0, y: 30, x: -10 }}
       animate={inView ? { opacity: 1, y: 0, x: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08, ease: 'easeOut' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onHoverStart={() => animate(hover, 1, { duration: 0.22 })}
+      onHoverEnd={() => animate(hover, 0, { duration: 0.22 })}
       style={{
         backgroundColor: C.card,
-        border: `1px solid ${hovered ? 'rgba(20,184,166,0.3)' : C.border}`,
+        border: '1px solid',
+        borderColor,
         borderRadius: '16px',
         overflow: 'hidden',
         display: 'grid',
         gridTemplateColumns: event.image_url ? '80px 1fr auto' : '80px 1fr',
         gap: 0,
-        transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
-        boxShadow: hovered
-          ? '0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(20,184,166,0.08)'
-          : '0 2px 12px rgba(0,0,0,0.2)',
+        boxShadow: cardShadow,
         cursor: 'default',
         position: 'relative',
       }}
     >
       {/* Left: Date column */}
-      <div style={{
+      <motion.div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '24px 12px',
         borderRight: `1px solid ${C.border}`,
-        background: hovered
-          ? 'linear-gradient(180deg, rgba(20,184,166,0.06), rgba(20,184,166,0.02))'
-          : 'rgba(13,17,23,0.5)',
-        transition: 'background 0.25s ease',
+        background: dateBg,
         minWidth: '80px',
         gap: '2px',
       }}>
@@ -355,7 +366,7 @@ function EventCard({ event, index }) {
         }}>
           {year}
         </span>
-      </div>
+      </motion.div>
 
       {/* Center: Content */}
       <div style={{ padding: '20px 24px', minWidth: 0 }}>
@@ -400,9 +411,9 @@ function EventCard({ event, index }) {
 
         {/* Bottom accent line on hover */}
         <motion.div
-          animate={{ scaleX: hovered ? 1 : 0, opacity: hovered ? 1 : 0 }}
-          transition={{ duration: 0.25 }}
           style={{
+            scaleX: hover,
+            opacity: hover,
             height: '1px',
             background: `linear-gradient(90deg, ${C.cyan}, transparent)`,
             marginTop: '16px',
@@ -418,15 +429,14 @@ function EventCard({ event, index }) {
           overflow: 'hidden',
           position: 'relative',
         }}>
-          <img
+          <motion.img
             src={event.image_url}
             alt={event.title}
             style={{
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              filter: hovered ? 'brightness(0.9)' : 'brightness(0.6) saturate(0.7)',
-              transition: 'filter 0.3s ease',
+              filter: imageFilter,
             }}
           />
           {/* Overlay fade left */}
@@ -440,9 +450,8 @@ function EventCard({ event, index }) {
 
       {/* Top accent bar on hover */}
       <motion.div
-        animate={{ scaleX: hovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
         style={{
+          scaleX: hover,
           position: 'absolute',
           top: 0,
           left: 0,
@@ -557,7 +566,7 @@ function EventsBootLoader({ progress }) {
           borderRadius: 16,
           padding: '22px 20px 18px',
           background: 'rgba(9,13,21,0.9)',
-          boxShadow: '0 18px 60px rgba(0,0,0,0.55)',
+          boxShadow: '0 12px 42px rgba(0,0,0,0.48)',
         }}>
           <div style={{
             display: 'flex',
@@ -592,7 +601,7 @@ function EventsBootLoader({ progress }) {
                 width: 10, height: 10, borderRadius: '50%',
                 transform: 'translate(-50%, -50%)',
                 backgroundColor: pulseColor,
-                boxShadow: `0 0 20px ${pulseColor}99`,
+                boxShadow: `0 0 12px ${pulseColor}70`,
               }} />
             </div>
 
@@ -607,7 +616,7 @@ function EventsBootLoader({ progress }) {
                   height: '100%',
                   transition: 'width 120ms linear',
                   background: `linear-gradient(90deg, ${C.cyan}, ${C.purple})`,
-                  boxShadow: '0 0 18px rgba(139,92,246,0.35)',
+                  boxShadow: '0 0 12px rgba(139,92,246,0.25)',
                 }} />
               </div>
 
@@ -755,17 +764,17 @@ function EventsPage() {
     }
   }
 
-  const filtered = events.filter(event => {
-    if (filter === 'all') return true
-    return event.type === filter
-  })
+  const filtered = useMemo(() => {
+    if (filter === 'all') return events
+    return events.filter(event => event.type === filter)
+  }, [events, filter])
 
-  const counts = {
+  const counts = useMemo(() => ({
     all: events.length,
     upcoming: events.filter(e => e.type === 'upcoming').length,
     today: events.filter(e => e.type === 'today').length,
     past: events.filter(e => e.type === 'past').length,
-  }
+  }), [events])
 
   if (introLoading) {
     return <EventsBootLoader progress={introProgress} />

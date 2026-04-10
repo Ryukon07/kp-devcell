@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import MembersAdmin from '../components/admin/MembersAdmin.jsx'
 import EventsAdmin from '../components/admin/EventsAdmin.jsx'
 import AnnouncementsAdmin from '../components/admin/AnnouncementsAdmin.jsx'
@@ -50,12 +50,51 @@ function AdminBg() {
 }
 
 /* ── Blinking terminal cursor ── */
+function useVisibleInterval(callback, delay) {
+  const callbackRef = useRef(callback)
+
+  useEffect(() => {
+    callbackRef.current = callback
+  }, [callback])
+
+  useEffect(() => {
+    let timerId = null
+
+    const start = () => {
+      if (timerId) return
+      timerId = setInterval(() => {
+        callbackRef.current()
+      }, delay)
+    }
+
+    const stop = () => {
+      if (!timerId) return
+      clearInterval(timerId)
+      timerId = null
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stop()
+      } else {
+        start()
+      }
+    }
+
+    start()
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [delay])
+}
+
 function Cursor({ color = '#14B8A6' }) {
   const [on, setOn] = useState(true)
-  useEffect(() => {
-    const t = setInterval(() => setOn(v => !v), 530)
-    return () => clearInterval(t)
-  }, [])
+  useVisibleInterval(() => setOn(v => !v), 530)
+
   return (
     <span style={{
       display: 'inline-block', width: 8, height: 16,
@@ -69,10 +108,7 @@ function Cursor({ color = '#14B8A6' }) {
 /* ── Top bar ── */
 function TopBar({ activeTab, onLogout, isMobile, onMenuToggle, sidebarOpen }) {
   const [time, setTime] = useState(new Date())
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(t)
-  }, [])
+  useVisibleInterval(() => setTime(new Date()), 1000)
 
   const pad = n => String(n).padStart(2, '0')
   const timeStr = `${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}`

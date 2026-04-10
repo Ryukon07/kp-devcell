@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
-// ── Styles ─────────────────────────────────────────────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap');
 
@@ -22,7 +21,6 @@ const CSS = `
 
   .csb-root.hidden { opacity: 0; }
 
-  /* ── Track wrapper ── */
   .csb-track-wrap {
     position: relative;
     flex: 1;
@@ -33,7 +31,6 @@ const CSS = `
     max-height: 70vh;
   }
 
-  /* ── The vertical rail line ── */
   .csb-rail {
     position: absolute;
     right: 14px;
@@ -46,7 +43,6 @@ const CSS = `
     cursor: pointer;
   }
 
-  /* ── Progress fill ── */
   .csb-rail-fill {
     position: absolute;
     top: 0;
@@ -57,7 +53,6 @@ const CSS = `
     transition: height 0.08s linear;
   }
 
-  /* ── Thumb ── */
   .csb-thumb {
     position: absolute;
     right: -3px;
@@ -85,7 +80,6 @@ const CSS = `
     cursor: grabbing;
   }
 
-  /* ── Hover scanner glow ── */
   .csb-scanner {
     position: absolute;
     right: -1px;
@@ -101,7 +95,6 @@ const CSS = `
 
   .csb-rail:hover .csb-scanner { opacity: 1; }
 
-  /* ── Top / bottom metadata ── */
   .csb-meta {
     font-family: 'Fira Code', monospace;
     font-size: 8px;
@@ -119,7 +112,6 @@ const CSS = `
 
   .csb-meta span { color: rgba(255,255,255,0.45); }
 
-  /* ── Pulse animation on thumb ── */
   @keyframes csb-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
     50%       { box-shadow: 0 0 0 5px rgba(255,255,255,0.05); }
@@ -130,7 +122,6 @@ const CSS = `
   }
 `
 
-// ── Inject styles once ─────────────────────────────────────────────────────
 let styleInjected = false
 function injectStyles() {
   if (styleInjected) return
@@ -140,7 +131,6 @@ function injectStyles() {
   document.head.appendChild(el)
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
 export default function CustomScrollbar() {
   const railRef      = useRef(null)
   const thumbRef     = useRef(null)
@@ -150,11 +140,12 @@ export default function CustomScrollbar() {
   const dragStartY   = useRef(0)
   const dragStartPct = useRef(0)
   const hideTimer    = useRef(null)
+  const rafRef       = useRef(null)
+  const lastPctRef   = useRef(-1)
 
   const [visible, setVisible] = useState(false)
   const [pct, setPct]         = useState(0)
 
-  // ── Metrics ───────────────────────────────────────────────────────────────
   const getMetrics = useCallback(() => {
     const scrolled = window.scrollY
     const total    = Math.max(1, document.body.scrollHeight - window.innerHeight)
@@ -162,9 +153,9 @@ export default function CustomScrollbar() {
     return { total, p }
   }, [])
 
-  // ── Update DOM ────────────────────────────────────────────────────────────
   const update = useCallback(() => {
     const { p } = getMetrics()
+    const nextPct = Math.round(p * 100)
 
     if (thumbRef.current && railRef.current) {
       const railH = railRef.current.offsetHeight
@@ -175,18 +166,25 @@ export default function CustomScrollbar() {
       fillRef.current.style.height = `${p * 100}%`
     }
 
-    setPct(Math.round(p * 100))
+    if (nextPct !== lastPctRef.current) {
+      lastPctRef.current = nextPct
+      setPct(nextPct)
+    }
   }, [getMetrics])
 
-  // ── Scroll handler ────────────────────────────────────────────────────────
   const handleScroll = useCallback(() => {
-    update()
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        update()
+        rafRef.current = null
+      })
+    }
+
     setVisible(true)
     clearTimeout(hideTimer.current)
     hideTimer.current = setTimeout(() => setVisible(false), 2200)
   }, [update])
 
-  // ── Drag ──────────────────────────────────────────────────────────────────
   const onThumbMouseDown = useCallback((e) => {
     e.preventDefault()
     isDragging.current   = true
@@ -213,7 +211,6 @@ export default function CustomScrollbar() {
     document.body.style.userSelect = ''
   }, [])
 
-  // ── Rail click to jump ────────────────────────────────────────────────────
   const onRailClick = useCallback((e) => {
     if (!railRef.current) return
     const rect  = railRef.current.getBoundingClientRect()
@@ -222,14 +219,12 @@ export default function CustomScrollbar() {
     window.scrollTo({ top: p * total, behavior: 'smooth' })
   }, [])
 
-  // ── Rail hover → scanner position ─────────────────────────────────────────
   const onRailMouseMove = useCallback((e) => {
     if (!railRef.current || !scannerRef.current) return
     const rect = railRef.current.getBoundingClientRect()
     scannerRef.current.style.top = `${e.clientY - rect.top}px`
   }, [])
 
-  // ── Mount ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     injectStyles()
 
@@ -256,21 +251,19 @@ export default function CustomScrollbar() {
       window.removeEventListener('resize',    update)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup',   onMouseUp)
-      document.head.removeChild(nativeStyle)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
       clearTimeout(hideTimer.current)
+      document.head.removeChild(nativeStyle)
+      document.body.style.userSelect = ''
     }
   }, [update, handleScroll, onMouseMove, onMouseUp])
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className={`csb-root${visible ? '' : ' hidden'}`}>
-
-      {/* Top: line counter */}
       <div className="csb-meta top">
         LN&nbsp;<span>{String(Math.round(pct * 4.2 + 1)).padStart(3, '0')}</span>
       </div>
 
-      {/* Track */}
       <div className="csb-track-wrap">
         <div
           className="csb-rail"
@@ -279,7 +272,7 @@ export default function CustomScrollbar() {
           onMouseMove={onRailMouseMove}
         >
           <div className="csb-rail-fill" ref={fillRef} />
-          <div className="csb-scanner"   ref={scannerRef} />
+          <div className="csb-scanner" ref={scannerRef} />
           <div
             className="csb-thumb"
             ref={thumbRef}
@@ -288,11 +281,9 @@ export default function CustomScrollbar() {
         </div>
       </div>
 
-      {/* Bottom: scroll percent */}
       <div className="csb-meta bot">
         <span>{pct}%</span>&nbsp;SCR
       </div>
-
     </div>
   )
 }

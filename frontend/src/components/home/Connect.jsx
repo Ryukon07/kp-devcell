@@ -12,6 +12,28 @@ const C = {
   green: '#3FB950',
 }
 
+function usePageVisible() {
+  const [visible, setVisible] = useState(() => !document.hidden)
+
+  useEffect(() => {
+    const onVisibility = () => setVisible(!document.hidden)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
+
+  return visible
+}
+
+function useVisibleInterval(callback, delay, enabled = true) {
+  const visible = usePageVisible()
+
+  useEffect(() => {
+    if (!enabled || !visible) return
+    const id = setInterval(callback, delay)
+    return () => clearInterval(id)
+  }, [callback, delay, enabled, visible])
+}
+
 // ── Links Data ────────────────────────────────────────────────
 const LINKS = [
   {
@@ -130,13 +152,18 @@ function TerminalCursor() {
 function GlitchText({ text, color }) {
   const [glitching, setGlitching] = useState(false)
   const chars = '!<>-_\\/[]{}—=+*^?#@$%&'
+  const glitchTimeoutRef = useRef(null)
+
+  useVisibleInterval(() => {
+    setGlitching(true)
+    if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current)
+    glitchTimeoutRef.current = setTimeout(() => setGlitching(false), 200)
+  }, 3000 + Math.random() * 4000)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGlitching(true)
-      setTimeout(() => setGlitching(false), 200)
-    }, 3000 + Math.random() * 4000)
-    return () => clearInterval(interval)
+    return () => {
+      if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current)
+    }
   }, [])
 
   return (
@@ -169,18 +196,27 @@ function SSHBot({ mouseX, mouseY }) {
   const [eyeDist, setEyeDist] = useState({ left: 0, right: 0 })
   const [blinking, setBlinking] = useState(false)
   const [mood, setMood] = useState('idle') // idle | focused | happy
+  const blinkTimeoutRef = useRef(null)
 
   // Blink randomly
-  useEffect(() => {
-    const blink = () => {
-      setBlinking(true)
-      setTimeout(() => setBlinking(false), 130)
+  const blink = useCallback(() => {
+    setBlinking(true)
+    if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current)
+    blinkTimeoutRef.current = setTimeout(() => setBlinking(false), 130)
+  }, [])
+
+  useVisibleInterval(() => {
+    blink()
+    if (Math.random() > 0.6) {
+      if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current)
+      blinkTimeoutRef.current = setTimeout(blink, 250)
     }
-    const interval = setInterval(() => {
-      blink()
-      if (Math.random() > 0.6) setTimeout(blink, 250)
-    }, 2500 + Math.random() * 2000)
-    return () => clearInterval(interval)
+  }, 2500 + Math.random() * 2000)
+
+  useEffect(() => {
+    return () => {
+      if (blinkTimeoutRef.current) clearTimeout(blinkTimeoutRef.current)
+    }
   }, [])
 
   useEffect(() => {
@@ -507,8 +543,12 @@ function SSHLine() {
   const [cmdIndex, setCmdIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
   const [typing, setTyping] = useState(true)
+  const isVisible = usePageVisible()
+  const nextCmdTimeoutRef = useRef(null)
 
   useEffect(() => {
+    if (!isVisible) return
+
     const cmd = commands[cmdIndex]
     let i = 0
     setDisplayed('')
@@ -519,13 +559,17 @@ function SSHLine() {
       if (i >= cmd.length) {
         clearInterval(iv)
         setTyping(false)
-        setTimeout(() => {
+        nextCmdTimeoutRef.current = setTimeout(() => {
           setCmdIndex(prev => (prev + 1) % commands.length)
         }, 2200)
       }
     }, 45)
-    return () => clearInterval(iv)
-  }, [cmdIndex])
+
+    return () => {
+      clearInterval(iv)
+      if (nextCmdTimeoutRef.current) clearTimeout(nextCmdTimeoutRef.current)
+    }
+  }, [cmdIndex, isVisible])
 
   return (
     <div style={{
@@ -552,6 +596,7 @@ export default function Connect() {
   const mouseY = useMotionValue(0)
   const [rawMouse, setRawMouse] = useState({ x: 0, y: 0 })
   const [isMobile, setIsMobile] = useState(false)
+  const moveRafRef = useRef(null)
 
 useEffect(() => {
   const check = () => setIsMobile(window.innerWidth < 768)
@@ -561,12 +606,24 @@ useEffect(() => {
 }, [])
 
   useEffect(() => {
+    if (isMobile) return
+
     const onMove = (e) => {
-      setRawMouse({ x: e.clientX, y: e.clientY })
+      if (moveRafRef.current) return
+      const { clientX, clientY } = e
+      moveRafRef.current = requestAnimationFrame(() => {
+        setRawMouse({ x: clientX, y: clientY })
+        moveRafRef.current = null
+      })
     }
+
     window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
+
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      if (moveRafRef.current) cancelAnimationFrame(moveRafRef.current)
+    }
+  }, [isMobile])
 
   return (
     <section

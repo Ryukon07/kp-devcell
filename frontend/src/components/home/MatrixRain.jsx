@@ -27,8 +27,11 @@ export default function MatrixRain({ heroRef }) {
     let speeds = Array(cols).fill(0).map(() => 0.1 + Math.random() * 0.25)
 
     let animId
+    let running = false
 
     const draw = () => {
+      if (!running) return
+
       ctx.fillStyle = 'rgba(13,17,23,0.07)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -73,7 +76,28 @@ export default function MatrixRain({ heroRef }) {
       animId = requestAnimationFrame(draw)
     }
 
-    animId = requestAnimationFrame(draw)
+    const start = () => {
+      if (running) return
+      running = true
+      animId = requestAnimationFrame(draw)
+    }
+
+    const stop = () => {
+      running = false
+      if (animId) cancelAnimationFrame(animId)
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stop()
+      } else {
+        setup()
+        start()
+      }
+    }
+
+    start()
+    document.addEventListener('visibilitychange', handleVisibility)
 
     const handleResize = () => {
       setup()
@@ -84,7 +108,8 @@ export default function MatrixRain({ heroRef }) {
     window.addEventListener('resize', handleResize)
 
     return () => {
-      cancelAnimationFrame(animId)
+      stop()
+      document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('resize', handleResize)
     }
   }, [heroRef])

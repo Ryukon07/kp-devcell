@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, animate } from 'framer-motion'
 import api from '../../api.js'
 
 const C = {
@@ -16,12 +16,20 @@ const C = {
 // ── Glitch text effect ─────────────────────────────────────────
 function GlitchText({ text, style }) {
   const [glitching, setGlitching] = useState(false)
+  const glitchTimeoutRef = useRef(null)
   const chars = '!@#$%^&*<>{}[]|\\01'
 
   const triggerGlitch = () => {
     setGlitching(true)
-    setTimeout(() => setGlitching(false), 400)
+    if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current)
+    glitchTimeoutRef.current = setTimeout(() => setGlitching(false), 400)
   }
+
+  useEffect(() => {
+    return () => {
+      if (glitchTimeoutRef.current) clearTimeout(glitchTimeoutRef.current)
+    }
+  }, [])
 
   return (
     <span
@@ -211,7 +219,27 @@ function TerminalModal({ member, onClose }) {
 // ── Hexagonal member card ──────────────────────────────────────
 function MemberCard({ member, index, onSelect }) {
   const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  const [hovered, setHovered] = useState(false)
+  const hover = useMotionValue(0)
+  const cardShadow = useTransform(
+    hover,
+    [0, 1],
+    [
+      `0 0 0 1px ${C.border}, 0 4px 16px rgba(0,0,0,0.2)`,
+      `0 0 0 1px ${C.cyan}, 0 0 24px rgba(20,184,166,0.2), 0 12px 40px rgba(0,0,0,0.4)`,
+    ]
+  )
+  const imageScale = useTransform(hover, [0, 1], [1, 1.08])
+  const imageFilter = useTransform(hover, [0, 1], ['grayscale(30%)', 'grayscale(0%)'])
+  const avatarBg = useTransform(
+    hover,
+    [0, 1],
+    [
+      `linear-gradient(135deg, rgba(20,184,166,0.15), rgba(139,92,246,0.2))`,
+      `linear-gradient(135deg, rgba(20,184,166,0.4), rgba(139,92,246,0.5))`,
+    ]
+  )
+  const initialsColor = useTransform(hover, [0, 1], [C.muted, C.fg])
+  const infoOverlayOpacity = useTransform(hover, [0, 1], [0, 1])
 
   // Random slight rotation for polaroid effect
   const rotation = ((index * 7) % 11) - 5
@@ -230,8 +258,8 @@ function MemberCard({ member, index, onSelect }) {
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: index * 0.04, type: 'spring', stiffness: 200, damping: 20 }}
       onClick={() => onSelect(member)}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+      onHoverStart={() => animate(hover, 1, { duration: 0.2 })}
+      onHoverEnd={() => animate(hover, 0, { duration: 0.2 })}
       style={{
         cursor: 'pointer',
         position: 'relative',
@@ -239,17 +267,12 @@ function MemberCard({ member, index, onSelect }) {
     >
       {/* Glowing border on hover */}
       <motion.div
-        animate={{
-          boxShadow: hovered
-            ? `0 0 0 1px ${C.cyan}, 0 0 24px rgba(20,184,166,0.2), 0 12px 40px rgba(0,0,0,0.4)`
-            : `0 0 0 1px ${C.border}, 0 4px 16px rgba(0,0,0,0.2)`,
-        }}
-        transition={{ duration: 0.2 }}
         style={{
           backgroundColor: C.card,
           borderRadius: '14px',
           overflow: 'hidden',
           position: 'relative',
+          boxShadow: cardShadow,
         }}
       >
         {/* Top color bar — unique per member */}
@@ -266,61 +289,51 @@ function MemberCard({ member, index, onSelect }) {
             <motion.img
               src={member.photo_url}
               alt={member.name}
-              animate={{ scale: hovered ? 1.08 : 1, filter: hovered ? 'grayscale(0%)' : 'grayscale(30%)' }}
-              transition={{ duration: 0.4 }}
               style={{
                 width: '100%', height: '100%',
                 objectFit: 'cover', display: 'block',
+                scale: imageScale,
+                filter: imageFilter,
               }}
             />
           ) : (
             <motion.div
-              animate={{
-                background: hovered
-                  ? `linear-gradient(135deg, rgba(20,184,166,0.4), rgba(139,92,246,0.5))`
-                  : `linear-gradient(135deg, rgba(20,184,166,0.15), rgba(139,92,246,0.2))`,
-              }}
               style={{
                 width: '100%', height: '100%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexDirection: 'column', gap: '8px',
+                background: avatarBg,
               }}
             >
-              <span style={{
+              <motion.span style={{
                 fontSize: '36px', fontWeight: 900,
-                color: hovered ? C.fg : C.muted,
+                color: initialsColor,
                 fontFamily: '"Fira Code", monospace',
-                transition: 'color 0.3s',
               }}>
                 {initials}
-              </span>
+              </motion.span>
             </motion.div>
           )}
 
           {/* Hover overlay */}
-          <AnimatePresence>
-            {hovered && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to top, rgba(13,17,23,0.9) 0%, transparent 60%)',
-                  display: 'flex', alignItems: 'flex-end',
-                  padding: '12px',
-                }}
-              >
-                <span style={{
-                  color: C.cyan, fontSize: '10px',
-                  fontFamily: '"Fira Code", monospace',
-                  letterSpacing: '0.1em',
-                }}>
-                  click for info →
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to top, rgba(13,17,23,0.9) 0%, transparent 60%)',
+              display: 'flex', alignItems: 'flex-end',
+              padding: '12px',
+              opacity: infoOverlayOpacity,
+              pointerEvents: 'none',
+            }}
+          >
+            <span style={{
+              color: C.cyan, fontSize: '10px',
+              fontFamily: '"Fira Code", monospace',
+              letterSpacing: '0.1em',
+            }}>
+              click for info →
+            </span>
+          </motion.div>
         </div>
 
         {/* Info */}
@@ -426,8 +439,15 @@ export default function MembersSection() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [])
 
-  const batches = ['all', ...new Set(members.map(m => m.batch).filter(Boolean).sort())]
-  const filtered = filter === 'all' ? members : members.filter(m => m.batch === filter)
+  const batches = useMemo(
+    () => ['all', ...new Set(members.map(m => m.batch).filter(Boolean).sort())],
+    [members]
+  )
+
+  const filtered = useMemo(
+    () => (filter === 'all' ? members : members.filter(m => m.batch === filter)),
+    [members, filter]
+  )
 
   if (!loading && members.length === 0) return null
 

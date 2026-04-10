@@ -49,8 +49,8 @@ function HomeLoader({ progress }) {
           to   { transform: translateY(42px); }
         }
         @keyframes homeLoaderGlow {
-          0%, 100% { opacity: 0.4; filter: blur(12px); }
-          50%      { opacity: 0.95; filter: blur(18px); }
+          0%, 100% { opacity: 0.4; filter: blur(8px); }
+          50%      { opacity: 0.95; filter: blur(12px); }
         }
         @keyframes homeLoaderText {
           0%   { opacity: 0; transform: translateY(4px); }
@@ -83,8 +83,8 @@ function HomeLoader({ progress }) {
           border: '1px solid rgba(20,184,166,0.26)',
           borderRadius: 18,
           background: 'linear-gradient(180deg, rgba(5,8,13,0.8), rgba(5,8,13,0.95))',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 18px 60px rgba(0,0,0,0.55), inset 0 0 36px rgba(20,184,166,0.08)',
+          backdropFilter: 'blur(5px)',
+          boxShadow: '0 12px 42px rgba(0,0,0,0.48), inset 0 0 24px rgba(20,184,166,0.08)',
           padding: '22px 20px 18px',
         }}>
           <div style={{
@@ -175,7 +175,7 @@ function HomeLoader({ progress }) {
                   height: '100%',
                   transition: 'width 120ms linear',
                   background: 'linear-gradient(90deg, #0ea5a4, #34d399)',
-                  boxShadow: '0 0 24px rgba(52,211,153,0.5)',
+                  boxShadow: '0 0 14px rgba(52,211,153,0.35)',
                 }} />
               </div>
 

@@ -63,32 +63,6 @@ export function SectionTitle({ children }) {
   )
 }
 
-export function TechBadge({ name, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      whileHover={{ scale: 1.08, borderColor: C.cyan, color: C.cyan }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 0.4, type: 'spring' }}
-      style={{
-        border: `1px solid ${C.border}`,
-        borderRadius: '8px',
-        padding: '8px 16px',
-        fontSize: '12px',
-        fontFamily: '"Fira Code", "Cascadia Code", monospace',
-        color: C.muted,
-        backgroundColor: C.card,
-        cursor: 'default',
-        transition: 'all 0.2s ease',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {name}
-    </motion.div>
-  )
-}
-
 export function Ticker({ items }) {
   return (
     <div
