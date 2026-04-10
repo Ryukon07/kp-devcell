@@ -170,6 +170,8 @@ function FilterBar({ filter, setFilter, counts }) {
         gap: '8px',
         marginBottom: '36px',
         fontFamily: '"Fira Code", monospace',
+        flexWrap: 'wrap',
+        overflowX: 'auto',
       }}
     >
       {filters.map(f => {
@@ -613,6 +615,7 @@ function EventsPage() {
       backgroundColor: C.bg,
       color: C.fg,
       position: 'relative',
+      paddingTop  : '56px',
     }}>
       {/* Ambient background glow */}
       <div style={{
