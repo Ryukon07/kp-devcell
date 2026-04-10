@@ -66,7 +66,7 @@ function TermInput({ label, name, value, onChange, type = 'text', required, plac
 }
 
 /* ── Member row in the file tree sidebar ── */
-function MemberTreeItem({ member, isSelected, onSelect, onEdit, onDelete }) {
+function MemberTreeItem({ member, isSelected, onSelect, onEdit, onDelete, isMobile }) {
   const [hovered, setHovered] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -127,7 +127,7 @@ function MemberTreeItem({ member, isSelected, onSelect, onEdit, onDelete }) {
         </div>
 
         {/* Context menu trigger */}
-        {hovered && (
+        {(hovered || isMobile) && (
           <button
             onClick={e => { e.stopPropagation(); setMenuOpen(m => !m) }}
             style={{
@@ -188,7 +188,7 @@ function MemberTreeItem({ member, isSelected, onSelect, onEdit, onDelete }) {
 }
 
 /* ── Member detail panel ── */
-function MemberDetail({ member }) {
+function MemberDetail({ member, isMobile }) {
   if (!member) return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column',
@@ -232,9 +232,9 @@ function MemberDetail({ member }) {
         <span style={{ marginLeft: 6 }}>member_info — bash</span>
       </div>
 
-      <div style={{ padding: '20px 20px' }}>
+      <div style={{ padding: isMobile ? '16px 12px' : '20px 20px' }}>
         {/* Avatar + name header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
           {member.photo_url ? (
             <img src={member.photo_url} alt={member.name}
               style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover',
@@ -259,7 +259,7 @@ function MemberDetail({ member }) {
           </div>
           {member.isCore && (
             <div style={{
-              marginLeft: 'auto',
+              marginLeft: isMobile ? 0 : 'auto',
               backgroundColor: 'rgba(20,184,166,0.1)',
               border: '1px solid rgba(20,184,166,0.3)',
               borderRadius: 20, padding: '3px 10px',
@@ -313,8 +313,21 @@ function MembersAdmin() {
   const [loading, setLoading]     = useState(false)
   const [selected, setSelected]   = useState(null)
   const [view, setView]           = useState('form') // 'form' | 'preview'
+  const [isMobile, setIsMobile]   = useState(() => window.innerWidth <= 900)
+  const [treeOpen, setTreeOpen]   = useState(true)
 
   useEffect(() => { fetchMembers() }, [])
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 900
+      setIsMobile(mobile)
+      if (!mobile) setTreeOpen(true)
+    }
+
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const fetchMembers = async () => {
     try {
@@ -383,6 +396,7 @@ function MembersAdmin() {
   const handleSelect = (member) => {
     setSelected(member)
     setView('preview')
+    if (isMobile) setTreeOpen(false)
   }
 
   return (
@@ -415,8 +429,8 @@ function MembersAdmin() {
       {/* ── IDE-style 3-panel layout ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '240px 1fr',
-        gridTemplateRows: 'auto 1fr',
+        gridTemplateColumns: isMobile ? '1fr' : '240px 1fr',
+        gridTemplateRows: isMobile ? 'auto auto auto 1fr' : 'auto 1fr',
         gap: 0,
         minHeight: 'calc(100vh - 180px)',
         border: '1px solid rgba(20,184,166,0.12)',
@@ -428,10 +442,11 @@ function MembersAdmin() {
 
         {/* ── Left: file tree of members ── */}
         <div style={{
-          gridRow: '1 / 3',
+          gridRow: isMobile ? 'auto' : '1 / 3',
           borderRight: '1px solid rgba(20,184,166,0.1)',
           display: 'flex', flexDirection: 'column',
           backgroundColor: 'rgba(10,13,18,0.5)',
+          borderBottom: isMobile ? '1px solid rgba(20,184,166,0.1)' : 'none',
         }}>
           {/* Tree header */}
           <div style={{
@@ -461,18 +476,45 @@ function MembersAdmin() {
             </button>
           </div>
 
+          {isMobile && (
+            <button
+              onClick={() => setTreeOpen(v => !v)}
+              style={{
+                margin: '10px 12px 8px',
+                background: 'rgba(20,184,166,0.08)',
+                border: '1px solid rgba(20,184,166,0.2)',
+                borderRadius: 8,
+                color: '#14B8A6',
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 12,
+                padding: '8px 10px',
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              {treeOpen ? '$ hide member explorer' : '$ show member explorer'}
+            </button>
+          )}
+
           {/* Folder label */}
           <div style={{
             padding: '8px 12px', fontSize: 11,
             color: '#374151', fontFamily: '"Fira Code", "Cascadia Code", monospace',
             display: 'flex', alignItems: 'center', gap: 6,
+            display: !isMobile || treeOpen ? 'flex' : 'none',
           }}>
             <span>▾</span>
             <span>📁 members/</span>
           </div>
 
           {/* Member list */}
-          <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 12 }}>
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            paddingBottom: 12,
+            maxHeight: isMobile ? 260 : 'none',
+            display: !isMobile || treeOpen ? 'block' : 'none',
+          }}>
             {members.length === 0 ? (
               <div style={{
                 padding: '20px 14px', fontSize: 11,
@@ -490,6 +532,7 @@ function MembersAdmin() {
                   onSelect={handleSelect}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                    isMobile={isMobile}
                 />
               ))
             )}
@@ -502,6 +545,7 @@ function MembersAdmin() {
           display: 'flex', alignItems: 'flex-end',
           backgroundColor: 'rgba(10,13,18,0.4)',
           padding: '0 4px',
+          overflowX: 'auto',
         }}>
           {[
             { id: 'form', label: editingId ? '✏️ edit_member.js' : '➕ new_member.js' },
@@ -520,6 +564,7 @@ function MembersAdmin() {
                 fontSize: 12, cursor: 'pointer',
                 transition: 'all 0.15s',
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {tab.label}
@@ -530,7 +575,7 @@ function MembersAdmin() {
         {/* ── Bottom-right: form or preview ── */}
         <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
           {view === 'form' ? (
-            <div style={{ padding: '24px 28px' }}>
+            <div style={{ padding: isMobile ? '16px 12px' : '24px 28px' }}>
               {/* Form header comment */}
               <div style={{
                 fontFamily: '"Fira Code", "Cascadia Code", monospace',
@@ -545,7 +590,7 @@ function MembersAdmin() {
                 {/* Fields grid */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(220px, 1fr))',
                   gap: 16, marginBottom: 16,
                 }}>
                   {FIELDS.map(f => (
@@ -614,7 +659,7 @@ function MembersAdmin() {
                 </label>
 
                 {/* Buttons */}
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <button type="submit" disabled={loading} className="term-btn-primary">
                     {loading ? '$ executing...' : editingId ? '$ git commit -m "update"' : '$ git add member'}
                   </button>
@@ -631,7 +676,7 @@ function MembersAdmin() {
               </form>
             </div>
           ) : (
-            <MemberDetail member={selected} />
+            <MemberDetail member={selected} isMobile={isMobile} />
           )}
         </div>
       </div>

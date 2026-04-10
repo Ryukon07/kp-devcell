@@ -120,6 +120,7 @@ function AccessDetail({
   onGiveAccess,
   onRemoveAccess,
   loading,
+  isMobile,
 }) {
   const [focused, setFocused] = useState(false);
 
@@ -182,7 +183,7 @@ function AccessDetail({
         <span style={{ marginLeft: 6 }}>access_control — bash</span>
       </div>
 
-      <div style={{ padding: "20px 24px" }}>
+      <div style={{ padding: isMobile ? "16px 12px" : "20px 24px" }}>
         {/* Member header */}
         <div
           style={{
@@ -190,6 +191,7 @@ function AccessDetail({
             alignItems: "center",
             gap: 14,
             marginBottom: 28,
+            flexWrap: isMobile ? "wrap" : "nowrap",
           }}
         >
           {member.photo_url ? (
@@ -228,7 +230,7 @@ function AccessDetail({
           </div>
           <div
             style={{
-              marginLeft: "auto",
+              marginLeft: isMobile ? 0 : "auto",
               backgroundColor: member.hasAdminAccess
                 ? "rgba(20,184,166,0.1)"
                 : "rgba(75,85,99,0.1)",
@@ -489,9 +491,22 @@ function AdminAccessPanel() {
   const [loading, setLoading] = useState(false);
   const [personalEmails, setPersonalEmails] = useState({});
   const [selected, setSelected] = useState(null);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
+  const [treeOpen, setTreeOpen] = useState(true);
 
   useEffect(() => {
     fetchMembers();
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 900;
+      setIsMobile(mobile);
+      if (!mobile) setTreeOpen(true);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const fetchMembers = async () => {
@@ -556,6 +571,11 @@ function AdminAccessPanel() {
   const withAccess = members.filter((m) => m.hasAdminAccess);
   const withoutAccess = members.filter((m) => !m.hasAdminAccess);
 
+  const handleSelectMember = (member) => {
+    setSelected(member);
+    if (isMobile) setTreeOpen(false);
+  };
+
   return (
     <>
       <style>{`
@@ -566,8 +586,8 @@ function AdminAccessPanel() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "240px 1fr",
-          gridTemplateRows: "auto 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "240px 1fr",
+          gridTemplateRows: isMobile ? "auto auto auto 1fr" : "auto 1fr",
           gap: 0,
           minHeight: "calc(100vh - 180px)",
           border: "1px solid rgba(20,184,166,0.12)",
@@ -580,11 +600,12 @@ function AdminAccessPanel() {
         {/* ── Left: member tree ── */}
         <div
           style={{
-            gridRow: "1 / 3",
+            gridRow: isMobile ? "auto" : "1 / 3",
             borderRight: "1px solid rgba(20,184,166,0.1)",
             display: "flex",
             flexDirection: "column",
             backgroundColor: "rgba(10,13,18,0.5)",
+            borderBottom: isMobile ? "1px solid rgba(20,184,166,0.1)" : "none",
           }}
         >
           {/* Tree header */}
@@ -623,8 +644,36 @@ function AdminAccessPanel() {
             </div>
           </div>
 
+          {isMobile && (
+            <button
+              onClick={() => setTreeOpen((v) => !v)}
+              style={{
+                margin: "10px 12px 8px",
+                background: "rgba(20,184,166,0.08)",
+                border: "1px solid rgba(20,184,166,0.2)",
+                borderRadius: 8,
+                color: "#14B8A6",
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 12,
+                padding: "8px 10px",
+                textAlign: "left",
+                cursor: "pointer",
+              }}
+            >
+              {treeOpen ? "$ hide member explorer" : "$ show member explorer"}
+            </button>
+          )}
+
           {/* Member list — grouped */}
-          <div style={{ flex: 1, overflowY: "auto", paddingBottom: 12 }}>
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              paddingBottom: 12,
+              maxHeight: isMobile ? 260 : "none",
+              display: !isMobile || treeOpen ? "block" : "none",
+            }}
+          >
             {members.length === 0 ? (
               <div
                 style={{
@@ -661,7 +710,7 @@ function AdminAccessPanel() {
                         key={m._id}
                         member={m}
                         isSelected={selected?._id === m._id}
-                        onSelect={setSelected}
+                        onSelect={handleSelectMember}
                       />
                     ))}
                   </div>
@@ -689,7 +738,7 @@ function AdminAccessPanel() {
                         key={m._id}
                         member={m}
                         isSelected={selected?._id === m._id}
-                        onSelect={setSelected}
+                        onSelect={handleSelectMember}
                       />
                     ))}
                   </div>
@@ -707,6 +756,7 @@ function AdminAccessPanel() {
             alignItems: "flex-end",
             backgroundColor: "rgba(10,13,18,0.4)",
             padding: "0 4px",
+            overflowX: "auto",
           }}
         >
           <button
@@ -720,6 +770,7 @@ function AdminAccessPanel() {
               fontSize: 12,
               cursor: "default",
               whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
             🔐 {selected ? `manage — ${selected.name}` : "access_control.js"}
@@ -737,6 +788,7 @@ function AdminAccessPanel() {
             onGiveAccess={handleGiveAccess}
             onRemoveAccess={handleRemoveAccess}
             loading={loading}
+            isMobile={isMobile}
           />
         </div>
       </div>

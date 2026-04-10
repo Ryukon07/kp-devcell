@@ -77,6 +77,7 @@ function AnnouncementTreeItem({
   onSelect,
   onEdit,
   onDelete,
+  isMobile,
 }) {
   const [hovered, setHovered] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -154,7 +155,7 @@ function AnnouncementTreeItem({
         </div>
 
         {/* Context menu trigger */}
-        {hovered && (
+        {(hovered || isMobile) && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -256,7 +257,7 @@ function AnnouncementTreeItem({
 }
 
 /* ── Announcement detail panel ── */
-function AnnouncementDetail({ announcement }) {
+function AnnouncementDetail({ announcement, isMobile }) {
   if (!announcement)
     return (
       <div
@@ -326,7 +327,7 @@ function AnnouncementDetail({ announcement }) {
         <span style={{ marginLeft: 6 }}>announcement_info — bash</span>
       </div>
 
-      <div style={{ padding: "20px 20px" }}>
+      <div style={{ padding: isMobile ? "16px 12px" : "20px 20px" }}>
         {/* Header */}
         <div
           style={{
@@ -334,6 +335,7 @@ function AnnouncementDetail({ announcement }) {
             alignItems: "center",
             gap: 14,
             marginBottom: 24,
+            flexWrap: isMobile ? "wrap" : "nowrap",
           }}
         >
           <div
@@ -488,12 +490,25 @@ function AnnouncementsAdmin() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState(null);
   const [view, setView] = useState("form"); // 'form' | 'preview'
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
+  const [treeOpen, setTreeOpen] = useState(true);
 
   const [titleFocused, setTitleFocused] = useState(false);
   const [messageFocused, setMessageFocused] = useState(false);
 
   useEffect(() => {
     fetchAnnouncements();
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 900;
+      setIsMobile(mobile);
+      if (!mobile) setTreeOpen(true);
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const fetchAnnouncements = async () => {
@@ -574,6 +589,7 @@ function AnnouncementsAdmin() {
   const handleSelect = (announcement) => {
     setSelected(announcement);
     setView("preview");
+    if (isMobile) setTreeOpen(false);
   };
 
   const active = announcements.filter((a) => a.active);
@@ -607,8 +623,8 @@ function AnnouncementsAdmin() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "240px 1fr",
-          gridTemplateRows: "auto 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "240px 1fr",
+          gridTemplateRows: isMobile ? "auto auto auto 1fr" : "auto 1fr",
           gap: 0,
           minHeight: "calc(100vh - 180px)",
           border: "1px solid rgba(20,184,166,0.12)",
@@ -621,11 +637,12 @@ function AnnouncementsAdmin() {
         {/* ── Left: file tree ── */}
         <div
           style={{
-            gridRow: "1 / 3",
+            gridRow: isMobile ? "auto" : "1 / 3",
             borderRight: "1px solid rgba(20,184,166,0.1)",
             display: "flex",
             flexDirection: "column",
             backgroundColor: "rgba(10,13,18,0.5)",
+            borderBottom: isMobile ? "1px solid rgba(20,184,166,0.1)" : "none",
           }}
         >
           {/* Tree header */}
@@ -672,8 +689,36 @@ function AnnouncementsAdmin() {
             </button>
           </div>
 
+          {isMobile && (
+            <button
+              onClick={() => setTreeOpen((v) => !v)}
+              style={{
+                margin: "10px 12px 8px",
+                background: "rgba(20,184,166,0.08)",
+                border: "1px solid rgba(20,184,166,0.2)",
+                borderRadius: 8,
+                color: "#14B8A6",
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 12,
+                padding: "8px 10px",
+                textAlign: "left",
+                cursor: "pointer",
+              }}
+            >
+              {treeOpen ? "$ hide announcement explorer" : "$ show announcement explorer"}
+            </button>
+          )}
+
           {/* Grouped list */}
-          <div style={{ flex: 1, overflowY: "auto", paddingBottom: 12 }}>
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              paddingBottom: 12,
+              maxHeight: isMobile ? 260 : "none",
+              display: !isMobile || treeOpen ? "block" : "none",
+            }}
+          >
             {announcements.length === 0 ? (
               <div
                 style={{
@@ -720,6 +765,7 @@ function AnnouncementsAdmin() {
                         onSelect={handleSelect}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        isMobile={isMobile}
                       />
                     ))}
                   </div>
@@ -752,6 +798,7 @@ function AnnouncementsAdmin() {
                         onSelect={handleSelect}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        isMobile={isMobile}
                       />
                     ))}
                   </div>
@@ -784,6 +831,7 @@ function AnnouncementsAdmin() {
             alignItems: "flex-end",
             backgroundColor: "rgba(10,13,18,0.4)",
             padding: "0 4px",
+            overflowX: "auto",
           }}
         >
           {[
@@ -816,6 +864,7 @@ function AnnouncementsAdmin() {
                 cursor: "pointer",
                 transition: "all 0.15s",
                 whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {tab.label}
@@ -828,7 +877,7 @@ function AnnouncementsAdmin() {
           style={{ overflow: "auto", display: "flex", flexDirection: "column" }}
         >
           {view === "form" ? (
-            <div style={{ padding: "24px 28px" }}>
+            <div style={{ padding: isMobile ? "16px 12px" : "24px 28px" }}>
               {/* Form header comment */}
               <div
                 style={{
@@ -1038,7 +1087,7 @@ function AnnouncementsAdmin() {
                 )}
 
                 {/* Buttons */}
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                   <button
                     type="submit"
                     disabled={loading}
@@ -1066,7 +1115,7 @@ function AnnouncementsAdmin() {
               </form>
             </div>
           ) : (
-            <AnnouncementDetail announcement={selected} />
+            <AnnouncementDetail announcement={selected} isMobile={isMobile} />
           )}
         </div>
       </div>

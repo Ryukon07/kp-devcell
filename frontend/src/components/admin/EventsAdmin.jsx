@@ -105,7 +105,7 @@ function TypeBadge({ type }) {
 }
 
 /* ── Event row in the file tree sidebar ── */
-function EventTreeItem({ event, isSelected, onSelect, onEdit, onDelete }) {
+function EventTreeItem({ event, isSelected, onSelect, onEdit, onDelete, isMobile }) {
   const [hovered, setHovered] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -158,7 +158,7 @@ function EventTreeItem({ event, isSelected, onSelect, onEdit, onDelete }) {
           </div>
         </div>
 
-        {hovered && (
+        {(hovered || isMobile) && (
           <button
             onClick={e => { e.stopPropagation(); setMenuOpen(m => !m) }}
             style={{
@@ -219,7 +219,7 @@ function EventTreeItem({ event, isSelected, onSelect, onEdit, onDelete }) {
 }
 
 /* ── Event detail panel ── */
-function EventDetail({ event }) {
+function EventDetail({ event, isMobile }) {
   if (!event) return (
     <div style={{
       flex: 1, display: 'flex', flexDirection: 'column',
@@ -264,7 +264,7 @@ function EventDetail({ event }) {
         <span style={{ marginLeft: 6 }}>event_info — bash</span>
       </div>
 
-      <div style={{ padding: '20px 20px' }}>
+      <div style={{ padding: isMobile ? '16px 12px' : '20px 20px' }}>
         {/* Image preview + header */}
         {event.image_url && (
           <div style={{ marginBottom: 20, borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(20,184,166,0.15)' }}>
@@ -278,7 +278,7 @@ function EventDetail({ event }) {
         )}
 
         {/* Title + type header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
           <div style={{
             width: 44, height: 44, borderRadius: 8, flexShrink: 0,
             backgroundColor: 'rgba(20,184,166,0.08)',
@@ -337,8 +337,21 @@ function EventsAdmin() {
   const [loading, setLoading]     = useState(false)
   const [selected, setSelected]   = useState(null)
   const [view, setView]           = useState('form') // 'form' | 'preview'
+  const [isMobile, setIsMobile]   = useState(() => window.innerWidth <= 900)
+  const [treeOpen, setTreeOpen]   = useState(true)
 
   useEffect(() => { fetchEvents() }, [])
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 900
+      setIsMobile(mobile)
+      if (!mobile) setTreeOpen(true)
+    }
+
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const fetchEvents = async () => {
     try {
@@ -421,6 +434,7 @@ function EventsAdmin() {
   const handleSelect = (event) => {
     setSelected(event)
     setView('preview')
+    if (isMobile) setTreeOpen(false)
   }
 
   // Group events by type for folder display
@@ -458,8 +472,8 @@ function EventsAdmin() {
       {/* ── IDE-style 2-panel layout (mirrors MembersAdmin) ── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '240px 1fr',
-        gridTemplateRows: 'auto 1fr',
+        gridTemplateColumns: isMobile ? '1fr' : '240px 1fr',
+        gridTemplateRows: isMobile ? 'auto auto auto 1fr' : 'auto 1fr',
         gap: 0,
         minHeight: 'calc(100vh - 180px)',
         border: '1px solid rgba(20,184,166,0.12)',
@@ -471,10 +485,11 @@ function EventsAdmin() {
 
         {/* ── Left: file tree of events ── */}
         <div style={{
-          gridRow: '1 / 3',
+          gridRow: isMobile ? 'auto' : '1 / 3',
           borderRight: '1px solid rgba(20,184,166,0.1)',
           display: 'flex', flexDirection: 'column',
           backgroundColor: 'rgba(10,13,18,0.5)',
+          borderBottom: isMobile ? '1px solid rgba(20,184,166,0.1)' : 'none',
         }}>
           {/* Tree header */}
           <div style={{
@@ -504,8 +519,34 @@ function EventsAdmin() {
             </button>
           </div>
 
+          {isMobile && (
+            <button
+              onClick={() => setTreeOpen(v => !v)}
+              style={{
+                margin: '10px 12px 8px',
+                background: 'rgba(20,184,166,0.08)',
+                border: '1px solid rgba(20,184,166,0.2)',
+                borderRadius: 8,
+                color: '#14B8A6',
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 12,
+                padding: '8px 10px',
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              {treeOpen ? '$ hide event explorer' : '$ show event explorer'}
+            </button>
+          )}
+
           {/* Grouped folder tree */}
-          <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 12 }}>
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            paddingBottom: 12,
+            maxHeight: isMobile ? 260 : 'none',
+            display: !isMobile || treeOpen ? 'block' : 'none',
+          }}>
             {events.length === 0 ? (
               <div style={{
                 padding: '20px 14px', fontSize: 11,
@@ -539,6 +580,7 @@ function EventsAdmin() {
                         onSelect={handleSelect}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
+                        isMobile={isMobile}
                       />
                     ))}
                   </div>
@@ -554,6 +596,7 @@ function EventsAdmin() {
           display: 'flex', alignItems: 'flex-end',
           backgroundColor: 'rgba(10,13,18,0.4)',
           padding: '0 4px',
+          overflowX: 'auto',
         }}>
           {[
             { id: 'form',    label: editingId ? '✏️ edit_event.js' : '➕ new_event.js' },
@@ -572,6 +615,7 @@ function EventsAdmin() {
                 fontSize: 12, cursor: 'pointer',
                 transition: 'all 0.15s',
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {tab.label}
@@ -582,7 +626,7 @@ function EventsAdmin() {
         {/* ── Bottom-right: form or preview ── */}
         <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
           {view === 'form' ? (
-            <div style={{ padding: '24px 28px' }}>
+            <div style={{ padding: isMobile ? '16px 12px' : '24px 28px' }}>
               {/* Form header comment */}
               <div style={{
                 fontFamily: '"Fira Code", "Cascadia Code", monospace',
@@ -597,7 +641,7 @@ function EventsAdmin() {
                 {/* Fields grid */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(220px, 1fr))',
                   gap: 16, marginBottom: 16,
                 }}>
                   <TermInput
@@ -675,7 +719,7 @@ function EventsAdmin() {
                 )}
 
                 {/* Buttons */}
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                   <button type="submit" disabled={loading} className="term-btn-primary">
                     {loading ? '$ executing...' : editingId ? '$ git commit -m "update"' : '$ git add event'}
                   </button>
@@ -692,7 +736,7 @@ function EventsAdmin() {
               </form>
             </div>
           ) : (
-            <EventDetail event={selected} />
+            <EventDetail event={selected} isMobile={isMobile} />
           )}
         </div>
       </div>

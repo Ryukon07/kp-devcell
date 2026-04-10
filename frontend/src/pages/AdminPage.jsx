@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import MembersAdmin from '../components/admin/MembersAdmin.jsx'
 import EventsAdmin from '../components/admin/EventsAdmin.jsx'
 import AnnouncementsAdmin from '../components/admin/AnnouncementsAdmin.jsx'
@@ -67,7 +67,7 @@ function Cursor({ color = '#14B8A6' }) {
 }
 
 /* ── Top bar ── */
-function TopBar({ activeTab, onLogout }) {
+function TopBar({ activeTab, onLogout, isMobile, onMenuToggle, sidebarOpen }) {
   const [time, setTime] = useState(new Date())
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000)
@@ -88,32 +88,64 @@ function TopBar({ activeTab, onLogout }) {
       padding: '0 28px', height: 52,
       fontFamily: '"Fira Code", "Cascadia Code", "Courier New", monospace',
     }}>
+      {isMobile && (
+        <button
+          onClick={onMenuToggle}
+          aria-label={sidebarOpen ? 'Close admin menu' : 'Open admin menu'}
+          style={{
+            marginRight: 12,
+            width: 32,
+            height: 32,
+            borderRadius: 7,
+            border: '1px solid rgba(20,184,166,0.3)',
+            backgroundColor: 'rgba(20,184,166,0.08)',
+            color: '#14B8A6',
+            cursor: 'pointer',
+            fontSize: 16,
+            lineHeight: 1,
+          }}
+        >
+          {sidebarOpen ? '×' : '☰'}
+        </button>
+      )}
+
       {/* Traffic lights */}
-      <div style={{ display: 'flex', gap: 7, marginRight: 20, flexShrink: 0 }}>
+      <div style={{ display: isMobile ? 'none' : 'flex', gap: 7, marginRight: 20, flexShrink: 0 }}>
         {['#FF5F57','#FFBD2E','#28CA41'].map((c, i) => (
           <div key={i} style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: c, opacity: 0.85 }} />
         ))}
       </div>
 
       {/* Path breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#4B5563' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#4B5563', minWidth: 0 }}>
         <span style={{ color: '#14B8A6' }}>~/admin</span>
-        <span>/</span>
-        <span style={{ color: '#e2e8f0' }}>{TABS.find(t => t.id === activeTab)?.cmd}</span>
-        <Cursor />
+        {!isMobile && <span>/</span>}
+        <span
+          style={{
+            color: '#e2e8f0',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: isMobile ? 115 : 'none',
+          }}
+        >
+          {TABS.find(t => t.id === activeTab)?.cmd}
+        </span>
+        {!isMobile && <Cursor />}
       </div>
 
       <div style={{ flex: 1 }} />
 
       {/* Right side info */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 11 }}>
-        <span style={{ color: '#374151' }}>{dateStr}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 20, fontSize: 11 }}>
+        {!isMobile && <span style={{ color: '#374151' }}>{dateStr}</span>}
         <span style={{ color: '#14B8A6', letterSpacing: '0.08em' }}>{timeStr}</span>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 5,
           backgroundColor: 'rgba(20,184,166,0.08)',
           border: '1px solid rgba(20,184,166,0.2)',
           borderRadius: 6, padding: '4px 10px',
+          display: isMobile ? 'none' : 'flex',
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#28CA41', display: 'inline-block' }} />
           <span style={{ color: '#9CA3AF', fontSize: 11 }}>root@kp-admin</span>
@@ -127,7 +159,7 @@ function TopBar({ activeTab, onLogout }) {
             color: '#ef4444',
             fontFamily: 'inherit',
             fontSize: 11,
-            padding: '4px 12px',
+            padding: isMobile ? '4px 8px' : '4px 12px',
             cursor: 'pointer',
             letterSpacing: '0.06em',
             transition: 'all 0.2s',
@@ -141,7 +173,7 @@ function TopBar({ activeTab, onLogout }) {
             e.target.style.borderColor = 'rgba(239,68,68,0.3)'
           }}
         >
-          $ logout
+          {isMobile ? 'logout' : '$ logout'}
         </button>
       </div>
     </div>
@@ -149,17 +181,26 @@ function TopBar({ activeTab, onLogout }) {
 }
 
 /* ── Sidebar ── */
-function Sidebar({ activeTab, setActiveTab }) {
+function Sidebar({ activeTab, setActiveTab, isMobile, open, onClose }) {
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId)
+    if (isMobile) onClose()
+  }
+
   return (
     <div style={{
       position: 'fixed', top: 52, left: 0, bottom: 0,
-      width: 220, zIndex: 50,
+      width: isMobile ? '78vw' : 220,
+      maxWidth: isMobile ? 300 : 'none',
+      zIndex: isMobile ? 120 : 50,
       backgroundColor: 'rgba(10,13,18,0.88)',
       borderRight: '1px solid rgba(20,184,166,0.1)',
       backdropFilter: 'blur(12px)',
       display: 'flex', flexDirection: 'column',
       fontFamily: '"Fira Code", "Cascadia Code", monospace',
       padding: '20px 0',
+      transform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+      transition: 'transform 0.2s ease',
     }}>
       {/* Explorer label */}
       <div style={{
@@ -178,7 +219,7 @@ function Sidebar({ activeTab, setActiveTab }) {
         return (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabClick(tab.id)}
             style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 18px',
@@ -235,6 +276,7 @@ function Sidebar({ activeTab, setActiveTab }) {
         borderRadius: 8,
         fontSize: 11, color: '#4B5563',
         lineHeight: 1.7,
+        display: isMobile ? 'none' : 'block',
       }}>
         <div style={{ color: '#14B8A6', marginBottom: 2 }}>$ sys.status</div>
         <div>db: <span style={{ color: '#28CA41' }}>connected</span></div>
@@ -246,46 +288,53 @@ function Sidebar({ activeTab, setActiveTab }) {
 }
 
 /* ── Tab bar (open files) ── */
-function TabBar({ activeTab, setActiveTab }) {
+function TabBar({ activeTab, setActiveTab, isMobile }) {
   return (
     <div style={{
-      position: 'fixed', top: 52, left: 220, right: 0, zIndex: 49,
+      position: 'fixed', top: 52, left: isMobile ? 0 : 220, right: 0, zIndex: 49,
       backgroundColor: 'rgba(13,17,23,0.9)',
       borderBottom: '1px solid rgba(20,184,166,0.1)',
-      display: 'flex', alignItems: 'flex-end',
-      paddingLeft: 4, height: 38,
+      padding: '0 6px', height: 38,
       fontFamily: '"Fira Code", "Cascadia Code", monospace',
       backdropFilter: 'blur(10px)',
       overflowX: 'auto',
     }}>
-      {TABS.map(tab => {
-        const active = activeTab === tab.id
-        return (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '0 16px', height: 38,
-              background: active ? 'rgba(22,27,38,0.95)' : 'transparent',
-              border: 'none',
-              borderTop: active ? '1px solid #14B8A6' : '1px solid transparent',
-              borderRight: '1px solid rgba(255,255,255,0.05)',
-              color: active ? '#e2e8f0' : '#4B5563',
-              fontFamily: 'inherit',
-              fontSize: 12,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s',
-              flexShrink: 0,
-            }}
-          >
-            <span style={{ fontSize: 11 }}>{tab.icon}</span>
-            {tab.cmd}
-            {active && <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: '#14B8A6', marginLeft: 2 }} />}
-          </button>
-        )
-      })}
+      <div style={{
+        minWidth: '100%',
+        width: 'max-content',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+      }}>
+        {TABS.map(tab => {
+          const active = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '0 16px', height: 38,
+                background: active ? 'rgba(22,27,38,0.95)' : 'transparent',
+                border: 'none',
+                borderTop: active ? '1px solid #14B8A6' : '1px solid transparent',
+                borderRight: '1px solid rgba(255,255,255,0.05)',
+                color: active ? '#e2e8f0' : '#4B5563',
+                fontFamily: 'inherit',
+                fontSize: 12,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s',
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ fontSize: 11 }}>{tab.icon}</span>
+              {tab.cmd}
+              {active && <span style={{ width: 5, height: 5, borderRadius: '50%', backgroundColor: '#14B8A6', marginLeft: 2 }} />}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -293,7 +342,20 @@ function TabBar({ activeTab, setActiveTab }) {
 /* ── Main ── */
 function AdminPage() {
   const [activeTab, setActiveTab] = useState('Members')
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth <= 900
+      setIsMobile(mobile)
+      if (!mobile) setSidebarOpen(false)
+    }
+
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const handleLogout = async () => {
     await signOut(auth)
@@ -306,6 +368,7 @@ function AdminPage() {
       <style>{`
         * { box-sizing: border-box; }
         body { margin: 0; background: #0D1117; }
+        html, body { overflow-x: hidden; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(20,184,166,0.25); border-radius: 3px; }
@@ -313,17 +376,42 @@ function AdminPage() {
       `}</style>
 
       <AdminBg />
-      <TopBar activeTab={activeTab} onLogout={handleLogout} />
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <TopBar
+        activeTab={activeTab}
+        onLogout={handleLogout}
+        isMobile={isMobile}
+        onMenuToggle={() => setSidebarOpen(v => !v)}
+        sidebarOpen={sidebarOpen}
+      />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isMobile={isMobile}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <TabBar activeTab={activeTab} setActiveTab={setActiveTab} isMobile={isMobile} />
+
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            top: 52,
+            backgroundColor: 'rgba(2,6,23,0.55)',
+            zIndex: 110,
+          }}
+        />
+      )}
 
       {/* Content area */}
       <div style={{
-        marginLeft: 220,
+        marginLeft: isMobile ? 0 : 220,
         marginTop: 52 + 38,
         minHeight: 'calc(100vh - 90px)',
         position: 'relative', zIndex: 1,
-        padding: '28px 32px',
+        padding: isMobile ? '18px 14px 22px' : '28px 32px',
         fontFamily: '"Fira Code", "Cascadia Code", monospace',
       }}>
         {/* Breadcrumb header */}
@@ -331,11 +419,12 @@ function AdminPage() {
           display: 'flex', alignItems: 'center', gap: 8,
           fontSize: 12, color: '#4B5563',
           marginBottom: 24,
+          flexWrap: 'wrap',
         }}>
           <span style={{ color: '#14B8A6' }}>$</span>
           <span>executing</span>
           <span style={{ color: '#e2e8f0' }}>./{TABS.find(t => t.id === activeTab)?.cmd}</span>
-          <span style={{ color: '#374151' }}>--mode=interactive</span>
+          <span style={{ color: '#374151' }}>{isMobile ? '--mobile' : '--mode=interactive'}</span>
           <Cursor />
         </div>
 
