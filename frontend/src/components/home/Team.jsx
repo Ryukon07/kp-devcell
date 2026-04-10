@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 // ── Theme constants ─────────────────────────────────────────────
@@ -25,7 +25,7 @@ function TeamCard({ name, role, year, stack, highlight, github, linkedin, emoji 
         border: `1px solid ${C.border}`,
         borderRadius: '12px',
         padding: '0',
-        width: '320px',
+        width: '300px',
         fontFamily: '"Fira Code", "Cascadia Code", "SF Mono", monospace',
         overflow: 'hidden',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
@@ -47,7 +47,7 @@ function TeamCard({ name, role, year, stack, highlight, github, linkedin, emoji 
           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ffbd2e' }} />
           <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#27c93f' }} />
         </div>
-        <div style={{ color: C.muted, fontSize: '12px' }}>
+        <div style={{ color: C.muted, fontSize: '11px' }}>
           devcell ~ inspect_member.sh
         </div>
         <div style={{ color: C.muted, fontSize: '14px' }}>×</div>
@@ -56,13 +56,7 @@ function TeamCard({ name, role, year, stack, highlight, github, linkedin, emoji 
       {/* Terminal Content */}
       <div style={{ padding: '20px' }}>
         {/* Emoji Avatar */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '20px',
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
           <div style={{ fontSize: '48px' }}>{emoji || '👩‍💻'}</div>
         </div>
 
@@ -241,74 +235,47 @@ const TEAM = [
   },
 ]
 
-// ── Stacked Cards Component ─────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────────
 export default function Team() {
   const [hoveredIndex, setHoveredIndex] = useState(null)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Calculate positions for each card
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
+  // Calculate positions for each card (desktop only)
   const getCardStyle = (index) => {
     const totalCards = TEAM.length
     const centerIndex = Math.floor(totalCards / 2)
-    
+
     if (hoveredIndex === null) {
-      // Scattered layout covering ~70% width with vertical variation
-      const spacing = 140 // Wider spacing between cards
+      const spacing = 140
       const offsetFromCenter = (index - centerIndex) * spacing
-      
-      // Vertical offset creates a wave-like pattern
-      const verticalOffsets = {
-        0: -20,
-        1: 10,
-        2: -15,
-        3: 25,
-        4: -10,
-        5: 15,
-      }
+      const verticalOffsets = { 0: -20, 1: 10, 2: -15, 3: 25, 4: -10, 5: 15 }
       const verticalOffset = verticalOffsets[index] || 0
-      
-      // Varied rotations for natural scattered look (reduced tilt)
-      const rotations = {
-        0: -4,
-        1: 6,
-        2: -3,
-        3: 7,
-        4: -5,
-        5: 4,
-      }
+      const rotations = { 0: -4, 1: 6, 2: -3, 3: 7, 4: -5, 5: 4 }
       const rotation = rotations[index] || 0
-      
-      return {
-        x: offsetFromCenter,
-        y: verticalOffset,
-        rotate: rotation,
-        scale: 1,
-        zIndex: index,
-      }
+      return { x: offsetFromCenter, y: verticalOffset, rotate: rotation, scale: 1, zIndex: index }
     }
-    
+
     if (hoveredIndex === index) {
-      // Hovered card - comes to front and centers
       const centerOffset = (index - centerIndex) * 140
-      return {
-        x: centerOffset,
-        y: 0,
-        rotate: 0,
-        scale: 1.05,
-        zIndex: totalCards + 1,
-      }
+      return { x: centerOffset, y: 0, rotate: 0, scale: 1.05, zIndex: totalCards + 1 }
     }
-    
-    // Non-hovered cards - subtle separation left or right
+
     const direction = index < hoveredIndex ? -1 : 1
     const distance = Math.abs(index - hoveredIndex)
     const basePosition = (index - centerIndex) * 140
-    
     return {
       x: basePosition + direction * (50 + distance * 20),
       y: direction * (10 + distance * 5),
       rotate: direction * (3 + distance * 1.5),
       scale: 0.96,
-      zIndex: totalCards - distance,
+      zIndex: TEAM.length - distance,
     }
   }
 
@@ -317,7 +284,7 @@ export default function Team() {
       style={{
         backgroundColor: C.bg,
         minHeight: '85vh',
-        padding: '60px 20px 0px 20px',
+        padding: isMobile ? '40px 0 40px 0' : '60px 20px 0px 20px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -326,29 +293,17 @@ export default function Team() {
       {/* Section Header */}
       <div
         style={{
-          marginBottom: '60px',
-          marginLeft: '200px',
+          marginBottom: '40px',
+          marginLeft: isMobile ? '0' : '200px',
           width: '100%',
           maxWidth: '1200px',
           display: 'flex',
-          justifyContent: 'flex-start',
+          justifyContent: isMobile ? 'center' : 'flex-start',
+          paddingLeft: isMobile ? '0' : '0',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-            // marginBottom: '32px',
-          }}
-        >
-          <div
-            style={{
-              width: '32px',
-              height: '1px',
-              backgroundColor: C.cyan,
-            }}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: '32px', height: '1px', backgroundColor: C.cyan }} />
           <div
             style={{
               color: C.cyan,
@@ -364,57 +319,91 @@ export default function Team() {
         </div>
       </div>
 
-      {/* Stacked Cards Container */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '550px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          perspective: '1000px',
-        }}
-      >
-        {TEAM.map((member, index) => {
-          const style = getCardStyle(index)
-          
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 100 }}
-              animate={{
-                opacity: 1,
-                y: 0,
-                x: style.x,
-                rotate: style.rotate,
-                scale: style.scale,
-              }}
-              transition={{
-                type: 'spring',
-                stiffness: 300,
-                damping: 25,
-                mass: 0.8,
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              style={{
-                position: 'absolute',
-                cursor: 'pointer',
-                zIndex: style.zIndex,
-              }}
-            >
-              <TeamCard {...member} />
-            </motion.div>
-          )
-        })}
-      </div>
+      {isMobile ? (
+        /* ── Mobile: horizontal swipe cards ── */
+        <div
+          style={{
+            display: 'flex',
+            overflowX: 'auto',
+            gap: '20px',
+            padding: '16px 24px 40px',
+            width: '100%',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            boxSizing: 'border-box',
+          }}
+        >
+          {TEAM.map((member, index) => {
+            const tilt = index % 2 === 0 ? -0.5 : 0.5
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.4, ease: 'easeOut' }}
+                style={{
+                  flexShrink: 0,
+                  scrollSnapAlign: 'center',
+                  rotate: `${tilt}deg`,
+                  transformOrigin: 'center bottom',
+                }}
+              >
+                <TeamCard {...member} />
+              </motion.div>
+            )
+          })}
+        </div>
+      ) : (
+        /* ── Desktop: stacked interactive cards ── */
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '550px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            perspective: '1000px',
+          }}
+        >
+          {TEAM.map((member, index) => {
+            const style = getCardStyle(index)
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 100 }}
+                animate={{
+                  opacity: 1,
+                  y: style.y,
+                  x: style.x,
+                  rotate: style.rotate,
+                  scale: style.scale,
+                }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25, mass: 0.8 }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  position: 'absolute',
+                  cursor: 'pointer',
+                  zIndex: style.zIndex,
+                }}
+              >
+                <TeamCard {...member} />
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
 
-      {/* Blinking cursor animation */}
       <style>{`
         @keyframes blink {
-          0%, 50% { opacity: 1; }
-          51%, 100% { opacity: 1; }
+          0%, 49% { opacity: 1; }
+          50%, 100% { opacity: 0; }
+        }
+        section div::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </section>

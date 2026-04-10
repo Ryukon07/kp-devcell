@@ -551,6 +551,14 @@ export default function Connect() {
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
   const [rawMouse, setRawMouse] = useState({ x: 0, y: 0 })
+  const [isMobile, setIsMobile] = useState(false)
+
+useEffect(() => {
+  const check = () => setIsMobile(window.innerWidth < 768)
+  check()
+  window.addEventListener('resize', check)
+  return () => window.removeEventListener('resize', check)
+}, [])
 
   useEffect(() => {
     const onMove = (e) => {
@@ -590,7 +598,7 @@ export default function Connect() {
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
-        padding: '0 48px',
+        padding: isMobile ? '0 20px' : '0 48px',
         boxSizing: 'border-box',
         position: 'relative',
         zIndex: 1,
@@ -639,29 +647,30 @@ export default function Connect() {
 
         {/* Main layout */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) 280px',
-          gap: '48px',
-          alignItems: 'start',
-        }}>
+  display: 'grid',
+  gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1fr) 280px',
+  gap: isMobile ? '24px' : '48px',
+  alignItems: 'start',
+}}>
 
           {/* Left: link grid */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-          }}>
+  display: 'grid',
+  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+  gap: '12px',
+}}>
             {LINKS.map((link, i) => (
               <LinkCard key={link.id} link={link} index={i} />
             ))}
           </div>
 
           {/* Right: bot + terminal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+          {!isMobile && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -733,6 +742,7 @@ export default function Connect() {
               ))}
             </div>
           </motion.div>
+          )}
         </div>
       </div>
     </section>
