@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext.jsx'
 import Navbar from './components/Navbar.jsx'
-import ProtectedRoute from './components/ProtectedRoute.jsx'
+import ProtectedRoute, {PublicOnlyRoute} from './components/ProtectedRoute.jsx'
 import HomePage from './pages/HomePage.jsx'
 import EventsPage from './pages/EventsPage.jsx'
 import ResourcesPage from './pages/ResourcesPage.jsx'
@@ -23,7 +23,11 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login" element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            } />
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminPage />

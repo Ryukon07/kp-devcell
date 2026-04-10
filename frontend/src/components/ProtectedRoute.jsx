@@ -11,4 +11,14 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+export function PublicOnlyRoute({ children }) {
+  const { user } = useAuth();
+
+  if(user) {
+    return <Navigate to="/admin" replace />
+  }
+
+  return children
+}
+
 export default ProtectedRoute
