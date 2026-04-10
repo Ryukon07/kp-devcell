@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { C } from "../constants/theme";
+import { claimPageBootLoader } from "../utils/bootLoaderGate.js";
 
 import { Section, SectionLabel, SectionTitle } from "../components/shared";
 
@@ -620,11 +621,13 @@ function FolderCard({ resource, index, isOpen, onToggle }) {
 
 // ── Component ─────────────────────────────────────────────────
 export default function Resources() {
-  const [introLoading, setIntroLoading] = useState(true);
+  const [introLoading, setIntroLoading] = useState(() => claimPageBootLoader("resources"));
   const [introProgress, setIntroProgress] = useState(0);
   const [openId, setOpenId] = useState(null);
 
   useEffect(() => {
+    if (!introLoading) return;
+
     const durationMs = 3000;
     const start = performance.now();
     let rafId = 0;

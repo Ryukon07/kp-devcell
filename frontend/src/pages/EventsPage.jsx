@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import api from '../api.js'
+import { claimPageBootLoader } from '../utils/bootLoaderGate.js'
 
 // ── Theme ─────────────────────────────────────────────────────
 const C = {
@@ -695,7 +696,7 @@ function StatsBar({ events }) {
 
 // ── Main component ─────────────────────────────────────────────
 function EventsPage() {
-  const [introLoading, setIntroLoading] = useState(true)
+  const [introLoading, setIntroLoading] = useState(() => claimPageBootLoader('events'))
   const [introProgress, setIntroProgress] = useState(0)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -706,6 +707,8 @@ function EventsPage() {
   }, [])
 
   useEffect(() => {
+    if (!introLoading) return
+
     const durationMs = 3200
     const start = performance.now()
     let rafId = 0

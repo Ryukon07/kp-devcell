@@ -9,6 +9,7 @@ import { Ticker }     from '../components/shared'
 import CustomScrollbar from '../components/CustomScrollbar'
 import MembersSection from '../components/home/MembersSection'
 import Connect from '../components/home/Connect'
+import { claimPageBootLoader } from '../utils/bootLoaderGate.js'
 
 const TICKER_ITEMS = [
   'Web Development', 'System Design', 'Open Source', 'Hackathons',
@@ -224,10 +225,12 @@ function HomeLoader({ progress }) {
 }
 
 export default function HomePage() {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => claimPageBootLoader('home'))
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    if (!loading) return
+
     const durationMs = 3400
     const start = performance.now()
     let rafId = 0
