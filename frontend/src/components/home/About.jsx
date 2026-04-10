@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
 import { C } from '../../constants/theme'
-import { Section, SectionLabel, TechBadge } from '../shared'
+import { Section, SectionLabel } from '../shared'
 import { ScrambleText } from '../../hooks/useScramble.jsx'
 
 // ── Scrambled stat counter ────────────────────────────────────
@@ -152,6 +152,56 @@ const TECH_STACK = [
   'PostgreSQL', 'Redis', 'AWS', 'CI/CD', 'Open Source',
 ]
 
+const TECH_ACCENTS = ['#14b8a6', '#8b5cf6', '#22c55e', '#ec4899']
+
+function TechMatrixChip({ tech, index }) {
+  const accent = TECH_ACCENTS[index % TECH_ACCENTS.length]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.35, delay: index * 0.04 }}
+      whileHover={{ y: -3, scale: 1.02 }}
+      style={{
+        border: `1px solid ${accent}44`,
+        background: `linear-gradient(180deg, ${accent}16, rgba(13,17,23,0.7))`,
+        borderRadius: 10,
+        padding: '10px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        transition: 'all 0.2s ease',
+      }}
+    >
+      <span style={{
+        width: 7,
+        height: 7,
+        borderRadius: '50%',
+        backgroundColor: accent,
+        boxShadow: `0 0 12px ${accent}99`,
+        flexShrink: 0,
+      }} />
+      <span style={{
+        color: '#d1d5db',
+        fontFamily: '"Fira Code", "Cascadia Code", monospace',
+        fontSize: 12,
+      }}>
+        {tech}
+      </span>
+      <span style={{
+        marginLeft: 'auto',
+        color: '#4b5563',
+        fontFamily: '"Fira Code", "Cascadia Code", monospace',
+        fontSize: 10,
+      }}>
+        v{(index % 4) + 1}.x
+      </span>
+    </motion.div>
+  )
+}
+
 const PARA_1 = "KP Dev Cell is IIT Mandi's development club. We exist to bridge the gap between curriculum and industry — through real projects, honest feedback, and a culture of building things that actually work."
 const PARA_2 = "No gatekeeping. No prerequisites. If you're curious and willing to put in the work — you belong here."
 
@@ -221,10 +271,98 @@ export default function About() {
       <div style={{ borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
         <Section style={{ padding: '64px 48px' }}>
           <SectionLabel>What we work with</SectionLabel>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {TECH_STACK.map((tech, i) => (
-              <TechBadge key={tech} name={tech} delay={i * 0.04} />
-            ))}
+
+          <style>{`
+            @keyframes techScanline {
+              from { transform: translateY(-100%); }
+              to { transform: translateY(460px); }
+            }
+          `}</style>
+
+          <div style={{
+            position: 'relative',
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            overflow: 'hidden',
+            background: 'linear-gradient(180deg, rgba(13,17,23,0.95), rgba(13,17,23,0.75))',
+            boxShadow: 'inset 0 0 40px rgba(20,184,166,0.06), 0 10px 30px rgba(0,0,0,0.35)',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 14px',
+              borderBottom: `1px solid ${C.border}`,
+              backgroundColor: 'rgba(10,13,18,0.85)',
+            }}>
+              {['#ef4444', '#f59e0b', '#22c55e'].map((dot, i) => (
+                <span key={i} style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: dot, opacity: 0.85 }} />
+              ))}
+              <span style={{
+                marginLeft: 8,
+                color: '#6b7280',
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 11,
+              }}>
+                ~/kp-dev-cell/stack/runtime
+              </span>
+            </div>
+
+            <div style={{
+              padding: '14px 16px 8px',
+              borderBottom: `1px solid ${C.border}`,
+              fontFamily: '"Fira Code", "Cascadia Code", monospace',
+              fontSize: 12,
+              color: '#9ca3af',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+            }}>
+              <span style={{ color: '#22c55e' }}>dev@kp</span>
+              <span style={{ color: '#6b7280' }}>:</span>
+              <span style={{ color: '#14b8a6' }}>~</span>
+              <span style={{ color: '#6b7280' }}>$</span>
+              <span style={{ color: '#e5e7eb' }}>npx kp-toolkit stack --live --verified</span>
+            </div>
+
+            <div style={{ position: 'relative', padding: '18px 16px 16px' }}>
+              <div style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                height: 60,
+                background: 'linear-gradient(180deg, rgba(20,184,166,0.07), transparent)',
+                animation: 'techScanline 3.2s linear infinite',
+                pointerEvents: 'none',
+              }} />
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                gap: 10,
+              }}>
+                {TECH_STACK.map((tech, i) => (
+                  <TechMatrixChip key={tech} tech={tech} index={i} />
+                ))}
+              </div>
+
+              <div style={{
+                marginTop: 14,
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 14,
+                fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                fontSize: 11,
+                color: '#4b5563',
+              }}>
+                <span><span style={{ color: '#14b8a6' }}>{TECH_STACK.length}</span> packages active</span>
+                <span>•</span>
+                <span>workspace status: <span style={{ color: '#22c55e' }}>stable</span></span>
+                <span>•</span>
+                <span>review mode: <span style={{ color: '#8b5cf6' }}>strict</span></span>
+              </div>
+            </div>
           </div>
         </Section>
       </div>
