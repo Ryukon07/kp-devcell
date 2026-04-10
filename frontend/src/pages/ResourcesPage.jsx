@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { C } from "../constants/theme";
 
@@ -83,6 +83,222 @@ const TYPE_META = {
     border: "rgba(139,92,246,0.25)",
   },
 };
+
+const RESOURCE_BOOT_STEPS = [
+  "Scanning resource directories",
+  "Indexing documents and decks",
+  "Resolving category structure",
+  "Attaching quick-access metadata",
+  "Publishing resource workspace",
+];
+
+function ResourcesBootLoader({ progress }) {
+  const rounded = Math.round(progress);
+  const stageIndex = Math.min(
+    RESOURCE_BOOT_STEPS.length - 1,
+    Math.floor((rounded / 100) * RESOURCE_BOOT_STEPS.length),
+  );
+  const code = useMemo(
+    () => `RES-${Math.random().toString(16).slice(2, 7).toUpperCase()}`,
+    [],
+  );
+
+  return (
+    <>
+      <style>{`
+        @keyframes resourcesScan {
+          0% { transform: translateY(-2px); opacity: 0.35; }
+          50% { transform: translateY(58px); opacity: 0.95; }
+          100% { transform: translateY(118px); opacity: 0.35; }
+        }
+        @keyframes resourcesBlink {
+          0%, 100% { opacity: 0.35; }
+          50% { opacity: 1; }
+        }
+        @keyframes resourcesPop {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.06); }
+        }
+      `}</style>
+
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 9999,
+          background:
+            "radial-gradient(980px 620px at 14% 16%, rgba(20,184,166,0.18), transparent 62%), radial-gradient(860px 560px at 86% 84%, rgba(139,92,246,0.11), transparent 64%), #070b11",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "min(92vw, 640px)",
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            background: "rgba(9,13,20,0.92)",
+            padding: "22px 20px 18px",
+            boxShadow: "0 18px 60px rgba(0,0,0,0.55)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 16,
+              fontFamily: '"Fira Code", "Cascadia Code", monospace',
+              fontSize: 11,
+              color: C.muted,
+            }}
+          >
+            <span>resources.indexer.boot</span>
+            <span>{code}</span>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "150px 1fr",
+              gap: 16,
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                width: 132,
+                height: 126,
+                margin: "0 auto",
+                borderRadius: 12,
+                border: `1px solid ${C.border}`,
+                background: "rgba(13,17,23,0.75)",
+                overflow: "hidden",
+              }}
+            >
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: 14,
+                    right: 14,
+                    top: 16 + i * 20,
+                    height: 8,
+                    borderRadius: 4,
+                    background: i % 2 === 0 ? "#1f2937" : "#243244",
+                    animation: i <= stageIndex ? "resourcesBlink 1.2s ease-in-out infinite" : "none",
+                    opacity: i <= stageIndex ? 1 : 0.45,
+                  }}
+                />
+              ))}
+              <div
+                style={{
+                  position: "absolute",
+                  left: 8,
+                  right: 8,
+                  height: 2,
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, transparent, #14B8A6, transparent)",
+                  animation: "resourcesScan 1.8s ease-in-out infinite",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  right: 8,
+                  bottom: 8,
+                  width: 18,
+                  height: 18,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, #14B8A6, #0f766e)",
+                  animation: "resourcesPop 1.4s ease-in-out infinite",
+                }}
+              />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                  fontSize: 12,
+                  color: "#9db1c1",
+                  marginBottom: 10,
+                }}
+              >
+                loading.resources.workspace
+              </div>
+
+              <div
+                style={{
+                  height: 10,
+                  borderRadius: 999,
+                  overflow: "hidden",
+                  border: `1px solid ${C.border}`,
+                  background: "#0f1623",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${rounded}%`,
+                    height: "100%",
+                    transition: "width 120ms linear",
+                    background: "linear-gradient(90deg, #14B8A6, #22d3ee)",
+                    boxShadow: "0 0 18px rgba(20,184,166,0.35)",
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  marginTop: 9,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                  fontSize: 11,
+                }}
+              >
+                <span style={{ color: C.muted }}>
+                  {RESOURCE_BOOT_STEPS[stageIndex]}
+                </span>
+                <span style={{ color: C.cyan }}>{rounded}%</span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 10,
+                  display: "grid",
+                  gap: 4,
+                  fontFamily: '"Fira Code", "Cascadia Code", monospace',
+                  fontSize: 10,
+                }}
+              >
+                {RESOURCE_BOOT_STEPS.map((step, idx) => {
+                  const done = idx < stageIndex;
+                  const current = idx === stageIndex;
+                  return (
+                    <div
+                      key={step}
+                      style={{
+                        color: done ? "#34d399" : current ? "#b8c9d6" : "#506271",
+                      }}
+                    >
+                      {done ? "[indexed]" : current ? "[reading]" : "[pending]"} {step}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 // ── Type badge ────────────────────────────────────────────────
 function TypeBadge({ type }) {
@@ -404,11 +620,50 @@ function FolderCard({ resource, index, isOpen, onToggle }) {
 
 // ── Component ─────────────────────────────────────────────────
 export default function Resources() {
+  const [introLoading, setIntroLoading] = useState(true);
+  const [introProgress, setIntroProgress] = useState(0);
   const [openId, setOpenId] = useState(null);
+
+  useEffect(() => {
+    const durationMs = 3000;
+    const start = performance.now();
+    let rafId = 0;
+
+    const tick = (now) => {
+      const t = Math.min((now - start) / durationMs, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setIntroProgress(eased * 100);
+
+      if (t < 1) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setIntroProgress(100);
+        setTimeout(() => setIntroLoading(false), 240);
+      }
+    };
+
+    rafId = requestAnimationFrame(tick);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!introLoading) {
+      document.body.style.overflow = "";
+    }
+  }, [introLoading]);
 
   const toggle = (id) => setOpenId((prev) => (prev === id ? null : id));
 
   const totalFiles = resources.reduce((s, r) => s + r.items.length, 0);
+
+  if (introLoading) {
+    return <ResourcesBootLoader progress={introProgress} />;
+  }
 
   return (
     <Section>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import api from '../api.js'
 
@@ -517,6 +517,126 @@ function LoadingSkeleton() {
   )
 }
 
+function EventsBootLoader({ progress }) {
+  const rounded = Math.round(progress)
+  const stage = rounded < 35 ? 'mapping schedule graph' : rounded < 75 ? 'syncing event timeline' : 'arming live sessions'
+  const pulseColor = rounded < 60 ? C.cyan : C.purple
+  const sessionCode = useMemo(() => `EVT-${Math.random().toString(16).slice(2, 6).toUpperCase()}`, [])
+
+  return (
+    <>
+      <style>{`
+        @keyframes eventsSweep {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes eventsPulse {
+          0%, 100% { transform: scale(0.95); opacity: 0.4; }
+          50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes eventsBlink {
+          0%, 100% { opacity: 0.25; }
+          50% { opacity: 0.95; }
+        }
+      `}</style>
+
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: 'radial-gradient(900px 540px at 22% 16%, rgba(20,184,166,0.16), transparent 62%), radial-gradient(780px 520px at 86% 84%, rgba(139,92,246,0.13), transparent 64%), #080c13',
+      }}>
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 'min(92vw, 620px)',
+          border: `1px solid ${C.border}`,
+          borderRadius: 16,
+          padding: '22px 20px 18px',
+          background: 'rgba(9,13,21,0.9)',
+          boxShadow: '0 18px 60px rgba(0,0,0,0.55)',
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 16,
+            fontFamily: '"Fira Code", monospace',
+            fontSize: 11,
+            color: C.muted,
+          }}>
+            <span>events.runtime.boot</span>
+            <span>{sessionCode}</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: 18, alignItems: 'center' }}>
+            <div style={{ position: 'relative', width: 118, height: 118, margin: '0 auto' }}>
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: '50%',
+                border: `1px solid ${C.border}`,
+              }} />
+              <div style={{
+                position: 'absolute', inset: 16, borderRadius: '50%',
+                border: `1px solid ${C.border}`,
+              }} />
+              <div style={{
+                position: 'absolute', inset: 32, borderRadius: '50%',
+                border: `1px dashed ${pulseColor}70`,
+                animation: 'eventsPulse 1.5s ease-in-out infinite',
+              }} />
+              <div style={{
+                position: 'absolute', left: '50%', top: '50%',
+                width: 10, height: 10, borderRadius: '50%',
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: pulseColor,
+                boxShadow: `0 0 20px ${pulseColor}99`,
+              }} />
+            </div>
+
+            <div>
+              <div style={{ fontFamily: '"Fira Code", monospace', fontSize: 12, color: '#9db0c0', marginBottom: 10 }}>
+                preparing.events.interface
+              </div>
+
+              <div style={{ height: 10, borderRadius: 999, background: '#0f1623', border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+                <div style={{
+                  width: `${rounded}%`,
+                  height: '100%',
+                  transition: 'width 120ms linear',
+                  background: `linear-gradient(90deg, ${C.cyan}, ${C.purple})`,
+                  boxShadow: '0 0 18px rgba(139,92,246,0.35)',
+                }} />
+              </div>
+
+              <div style={{ marginTop: 9, display: 'flex', justifyContent: 'space-between', fontFamily: '"Fira Code", monospace', fontSize: 11 }}>
+                <span style={{ color: C.muted }}>{stage}</span>
+                <span style={{ color: pulseColor }}>{rounded}%</span>
+              </div>
+
+              <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                {[0, 1, 2, 3, 4].map(i => (
+                  <span
+                    key={i}
+                    style={{
+                      flex: 1,
+                      height: 4,
+                      borderRadius: 999,
+                      backgroundColor: i <= Math.floor((rounded / 100) * 4) ? pulseColor : '#1f2838',
+                      animation: i <= Math.floor((rounded / 100) * 4) ? 'eventsBlink 1.2s ease-in-out infinite' : 'none',
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 // ── Stats bar ─────────────────────────────────────────────────
 function StatsBar({ events }) {
   const ref = useRef(null)
@@ -575,6 +695,8 @@ function StatsBar({ events }) {
 
 // ── Main component ─────────────────────────────────────────────
 function EventsPage() {
+  const [introLoading, setIntroLoading] = useState(true)
+  const [introProgress, setIntroProgress] = useState(0)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -582,6 +704,39 @@ function EventsPage() {
   useEffect(() => {
     fetchEvents()
   }, [])
+
+  useEffect(() => {
+    const durationMs = 3200
+    const start = performance.now()
+    let rafId = 0
+
+    const tick = (now) => {
+      const t = Math.min((now - start) / durationMs, 1)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setIntroProgress(eased * 100)
+
+      if (t < 1) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        setIntroProgress(100)
+        setTimeout(() => setIntroLoading(false), 260)
+      }
+    }
+
+    rafId = requestAnimationFrame(tick)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!introLoading) {
+      document.body.style.overflow = ''
+    }
+  }, [introLoading])
 
   const fetchEvents = async () => {
     try {
@@ -607,6 +762,10 @@ function EventsPage() {
     upcoming: events.filter(e => e.type === 'upcoming').length,
     today: events.filter(e => e.type === 'today').length,
     past: events.filter(e => e.type === 'past').length,
+  }
+
+  if (introLoading) {
+    return <EventsBootLoader progress={introProgress} />
   }
 
   return (
