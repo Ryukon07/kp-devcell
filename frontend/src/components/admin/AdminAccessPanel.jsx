@@ -47,26 +47,24 @@ function MemberTreeItem({ member, isSelected, onSelect }) {
         }}
       >
         {/* Status dot */}
-        <div
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: "50%",
-            flexShrink: 0,
-            backgroundColor: member.hasAdminAccess
-              ? "rgba(20,184,166,0.15)"
-              : "rgba(75,85,99,0.15)",
-            border: `1px solid ${member.hasAdminAccess ? "rgba(20,184,166,0.4)" : "rgba(75,85,99,0.3)"}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 10,
-            color: member.hasAdminAccess ? "#14B8A6" : "#4B5563",
-            fontWeight: 700,
-          }}
-        >
-          {member.name?.[0]?.toUpperCase()}
-        </div>
+        {member.photo_url ? (
+  <img
+    src={member.photo_url}
+    alt={member.name}
+    style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+    onError={e => { e.target.style.display = 'none' }}
+  />
+) : (
+  <div style={{
+    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+    backgroundColor: member.hasAdminAccess ? 'rgba(20,184,166,0.15)' : 'rgba(75,85,99,0.15)',
+    border: `1px solid ${member.hasAdminAccess ? 'rgba(20,184,166,0.4)' : 'rgba(75,85,99,0.3)'}`,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 10, color: member.hasAdminAccess ? '#14B8A6' : '#4B5563', fontWeight: 700,
+  }}>
+    {member.name?.[0]?.toUpperCase()}
+  </div>
+)}
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
@@ -194,29 +192,32 @@ function AccessDetail({
             marginBottom: 28,
           }}
         >
-          <div
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: "50%",
-              background: member.hasAdminAccess
-                ? "linear-gradient(135deg, rgba(20,184,166,0.25), rgba(20,184,166,0.08))"
-                : "linear-gradient(135deg, rgba(75,85,99,0.2), rgba(75,85,99,0.05))",
-              border: `2px solid ${member.hasAdminAccess ? "rgba(20,184,166,0.4)" : "rgba(75,85,99,0.3)"}`,
-              boxShadow: member.hasAdminAccess
-                ? "0 0 20px rgba(20,184,166,0.2)"
-                : "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 20,
-              color: member.hasAdminAccess ? "#14B8A6" : "#4B5563",
-              fontWeight: 700,
-              transition: "all 0.4s",
-            }}
-          >
-            {member.name?.[0]?.toUpperCase()}
-          </div>
+          {member.photo_url ? (
+  <img
+    src={member.photo_url}
+    alt={member.name}
+    style={{
+      width: 52, height: 52, borderRadius: '50%', objectFit: 'cover',
+      border: `2px solid ${member.hasAdminAccess ? 'rgba(20,184,166,0.4)' : 'rgba(75,85,99,0.3)'}`,
+      boxShadow: member.hasAdminAccess ? '0 0 20px rgba(20,184,166,0.2)' : 'none',
+    }}
+    onError={e => { e.target.style.display = 'none' }}
+  />
+) : (
+  <div style={{
+    width: 52, height: 52, borderRadius: '50%',
+    background: member.hasAdminAccess
+      ? 'linear-gradient(135deg, rgba(20,184,166,0.25), rgba(20,184,166,0.08))'
+      : 'linear-gradient(135deg, rgba(75,85,99,0.2), rgba(75,85,99,0.05))',
+    border: `2px solid ${member.hasAdminAccess ? 'rgba(20,184,166,0.4)' : 'rgba(75,85,99,0.3)'}`,
+    boxShadow: member.hasAdminAccess ? '0 0 20px rgba(20,184,166,0.2)' : 'none',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 20, color: member.hasAdminAccess ? '#14B8A6' : '#4B5563', fontWeight: 700,
+    transition: 'all 0.4s',
+  }}>
+    {member.name?.[0]?.toUpperCase()}
+  </div>
+)}
           <div>
             <div style={{ color: "#e2e8f0", fontSize: 15, fontWeight: 600 }}>
               {member.name}
