@@ -5,13 +5,13 @@ import toast from 'react-hot-toast'
 
 const emptyForm = {
   name: '', role: '', bio: '', photo_url: '',
-  github: '', linkedin: '', team: '', isCore: false
+  github: '', linkedin: '', batch: '', isCore: false
 }
 
 const FIELDS = [
   { label: 'name',       name: 'name',      type: 'text',  required: true,  placeholder: '"John Doe"' },
   { label: 'role',       name: 'role',      type: 'text',  required: true,  placeholder: '"Full Stack Dev"' },
-  { label: 'team',      name: 'team',     type: 'text',  required: true,  placeholder: '"backend"' },
+  { label: 'team',      name: 'batch',     type: 'text',  required: true,  placeholder: '"backend"' },
   { label: 'photo_url',  name: 'photo_url', type: 'text',  required: false, placeholder: '"https://..."' },
   { label: 'github',     name: 'github',    type: 'text',  required: false, placeholder: '"https://github.com/..."' },
   { label: 'linkedin',   name: 'linkedin',  type: 'text',  required: false, placeholder: '"https://linkedin.com/..."' },
@@ -204,7 +204,7 @@ function MemberDetail({ member, isMobile }) {
   const fields = [
     { key: 'name',     val: member.name },
     { key: 'role',     val: member.role },
-    { key: 'team',    val: member.team },
+    { key: 'batch',    val: member.batch },
     { key: 'isCore',   val: member.isCore ? 'true' : 'false' },
     { key: 'github',   val: member.github || 'null' },
     { key: 'linkedin', val: member.linkedin || 'null' },
@@ -369,7 +369,7 @@ function MembersAdmin() {
     setForm({
       name: member.name, role: member.role, bio: member.bio,
       photo_url: member.photo_url, github: member.github,
-      linkedin: member.linkedin, team: member.team, isCore: member.isCore
+      linkedin: member.linkedin, batch: member.batch, isCore: member.isCore
     })
     setEditingId(member._id)
     setView('form')
