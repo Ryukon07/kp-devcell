@@ -113,16 +113,8 @@ function MemberTreeItem({ member, isSelected, onSelect }) {
 }
 
 /* ── Access detail / action panel ── */
-function AccessDetail({
-  member,
-  personalEmails,
-  setPersonalEmails,
-  onGiveAccess,
-  onRemoveAccess,
-  loading,
-  isMobile,
-}) {
-  const [focused, setFocused] = useState(false);
+function AccessDetail({ member, onGiveAccess, onRemoveAccess, loading, isMobile }) {
+  // const [focused, setFocused] = useState(false);
 
   if (!member)
     return (
@@ -366,114 +358,57 @@ function AccessDetail({
             </button>
           </>
         ) : (
-          <>
-            {/* No access — show grant form */}
-            <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
-              <span style={{ color: "#14B8A6" }}>$ </span>
-              sudo grant-admin{" "}
-              <span style={{ color: "#e2e8f0" }}>{member.name}</span>
-            </div>
+  <>
+    <div style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
+      <span style={{ color: "#14B8A6" }}>$ </span>
+      sudo grant-admin{" "}
+      <span style={{ color: "#e2e8f0" }}>{member.name}</span>
+    </div>
 
-            <div
-              style={{
-                backgroundColor: "rgba(13,17,23,0.5)",
-                border: "1px solid rgba(35,43,58,0.9)",
-                borderRadius: 10,
-                padding: "16px 18px",
-                marginBottom: 16,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "#374151",
-                  marginBottom: 10,
-                  lineHeight: 1.8,
-                }}
-              >
-                <div>
-                  {"// credentials will be sent to their personal email"}
-                </div>
-                <div>{"// enter email below to proceed"}</div>
-              </div>
+    <div style={{
+      backgroundColor: "rgba(13,17,23,0.5)",
+      border: "1px solid rgba(35,43,58,0.9)",
+      borderRadius: 10,
+      padding: "14px 16px",
+      marginBottom: 16,
+      fontSize: 12,
+      color: "#374151",
+      lineHeight: 1.8,
+    }}>
+      <div>{"// credentials will be generated automatically"}</div>
+      <div>{"// save them when shown — password is shown only once"}</div>
+    </div>
 
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: 6,
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: focused ? "#14B8A6" : "#4B5563",
-                  fontFamily: '"Fira Code", "Cascadia Code", monospace',
-                  transition: "color 0.2s",
-                }}
-              >
-                <span style={{ color: "#374151" }}>const </span>
-                <span style={{ color: focused ? "#14B8A6" : "#9CA3AF" }}>
-                  personalEmail
-                </span>
-                <span style={{ color: "#374151" }}> =</span>
-              </label>
-              <input
-                type="email"
-                placeholder='"user@example.com"'
-                value={personalEmails[member._id] || ""}
-                onChange={(e) =>
-                  setPersonalEmails((prev) => ({
-                    ...prev,
-                    [member._id]: e.target.value,
-                  }))
-                }
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                style={{
-                  ...inputStyle,
-                  borderColor: focused ? "#14B8A6" : "rgba(35,43,58,0.95)",
-                  boxShadow: focused
-                    ? "0 0 14px rgba(20,184,166,0.18)"
-                    : "none",
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() => onGiveAccess(member)}
-              disabled={loading}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                background:
-                  "linear-gradient(135deg, rgba(20,184,166,0.9), rgba(20,184,166,0.7))",
-                border: "none",
-                borderRadius: 8,
-                padding: "10px 20px",
-                color: "#0D1117",
-                fontSize: 12,
-                cursor: "pointer",
-                fontFamily: '"Fira Code", "Cascadia Code", monospace',
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                transition: "transform 0.15s, box-shadow 0.15s",
-                opacity: loading ? 0.45 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 0 20px rgba(20,184,166,0.35)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              {loading ? "$ executing..." : "$ grant admin_access"}
-            </button>
-          </>
-        )}
+    <button
+      onClick={() => onGiveAccess(member)}
+      disabled={loading}
+      style={{
+        display: "flex", alignItems: "center", gap: 8,
+        background: "linear-gradient(135deg, rgba(20,184,166,0.9), rgba(20,184,166,0.7))",
+        border: "none", borderRadius: 8,
+        padding: "10px 20px",
+        color: "#0D1117", fontSize: 12,
+        cursor: "pointer",
+        fontFamily: '"Fira Code", "Cascadia Code", monospace',
+        fontWeight: 700, letterSpacing: "0.08em",
+        transition: "transform 0.15s, box-shadow 0.15s",
+        opacity: loading ? 0.45 : 1,
+      }}
+      onMouseEnter={(e) => {
+        if (!loading) {
+          e.currentTarget.style.transform = "translateY(-1px)";
+          e.currentTarget.style.boxShadow = "0 0 20px rgba(20,184,166,0.35)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+    >
+      {loading ? "$ executing..." : "$ grant admin_access"}
+    </button>
+  </>
+)}
 
         {/* Terminal prompt */}
         <div style={{ marginTop: 20, fontSize: 13, color: "#6B7280" }}>
@@ -489,7 +424,7 @@ function AccessDetail({
 function AdminAccessPanel() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [personalEmails, setPersonalEmails] = useState({});
+  const [credentials, setCredentials] = useState(null)
   const [selected, setSelected] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 900);
   const [treeOpen, setTreeOpen] = useState(true);
@@ -527,27 +462,27 @@ function AdminAccessPanel() {
   };
 
   const handleGiveAccess = async (member) => {
-    const personalEmail = personalEmails[member._id];
-    if (!personalEmail) {
-      toast.error("Enter personal email first");
-      return;
-    }
-    setLoading(true);
-    try {
-      const token = await auth.currentUser.getIdToken();
-      await api.post(
-        `/admin-access/give/${member._id}`,
-        { personalEmail },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      toast.success(`Admin access given to ${member.name}`);
-      await fetchMembers();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true)
+  try {
+    const token = await auth.currentUser.getIdToken()
+    const res = await api.post(
+      `/admin-access/give/${member._id}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    setCredentials({
+      name: member.name,
+      email: res.data.credentials.email,
+      password: res.data.credentials.password
+    })
+    toast.success(`Admin access given to ${member.name}`)
+    await fetchMembers()
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Something went wrong')
+  } finally {
+    setLoading(false)
+  }
+}
 
   const handleRemoveAccess = async (member) => {
     if (!confirm(`rm -f admin_access for ${member.name}?`)) return;
@@ -782,18 +717,108 @@ function AdminAccessPanel() {
           style={{ overflow: "auto", display: "flex", flexDirection: "column" }}
         >
           <AccessDetail
-            member={selected}
-            personalEmails={personalEmails}
-            setPersonalEmails={setPersonalEmails}
-            onGiveAccess={handleGiveAccess}
-            onRemoveAccess={handleRemoveAccess}
-            loading={loading}
-            isMobile={isMobile}
-          />
+  member={selected}
+  onGiveAccess={handleGiveAccess}
+  onRemoveAccess={handleRemoveAccess}
+  loading={loading}
+  isMobile={isMobile}
+/>
         </div>
       </div>
-    </>
-  );
+
+    {/* Credentials modal */}
+    {credentials && (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 999,
+        backgroundColor: "rgba(0,0,0,0.7)",
+        backdropFilter: "blur(4px)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+      }}>
+        <div style={{
+          backgroundColor: "#161B26",
+          border: "1px solid rgba(20,184,166,0.3)",
+          borderRadius: 16,
+          width: "100%", maxWidth: 420,
+          overflow: "hidden",
+          boxShadow: "0 0 60px rgba(20,184,166,0.15)",
+        }}>
+          {/* Header */}
+          <div style={{
+            padding: "14px 20px",
+            borderBottom: "1px solid rgba(20,184,166,0.1)",
+            display: "flex", alignItems: "center", gap: 8,
+            backgroundColor: "rgba(13,17,23,0.6)",
+          }}>
+            {["#FF5F57", "#FFBD2E", "#28CA41"].map((c, i) => (
+              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: c, opacity: 0.7 }} />
+            ))}
+            <span style={{ marginLeft: 8, color: "#4B5563", fontSize: 12, fontFamily: "monospace" }}>
+              credentials.env — {credentials.name}
+            </span>
+          </div>
+
+          {/* Body */}
+          <div style={{ padding: "24px 24px 16px", fontFamily: "monospace" }}>
+            <div style={{ fontSize: 12, color: "#14B8A6", marginBottom: 16 }}>
+              $ access granted — save these credentials now
+            </div>
+
+            <div style={{
+              backgroundColor: "#0D1117",
+              border: "1px solid #232B3A",
+              borderRadius: 10,
+              padding: "16px 18px",
+              fontSize: 13, lineHeight: 2.2,
+              marginBottom: 16,
+            }}>
+              <div>
+                <span style={{ color: "#4B5563" }}>EMAIL</span>
+                <span style={{ color: "#6B7280" }}> = </span>
+                <span style={{ color: "#E8EAED" }}>{credentials.email}</span>
+              </div>
+              <div>
+                <span style={{ color: "#4B5563" }}>PASSWORD</span>
+                <span style={{ color: "#6B7280" }}> = </span>
+                <span style={{ color: "#8B5CF6" }}>{credentials.password}</span>
+              </div>
+              <div>
+                <span style={{ color: "#4B5563" }}>LOGIN_URL</span>
+                <span style={{ color: "#6B7280" }}> = </span>
+                <span style={{ color: "#14B8A6" }}>kp-devcell.vercel.app/login</span>
+              </div>
+            </div>
+
+            <div style={{
+              backgroundColor: "rgba(239,68,68,0.06)",
+              border: "1px solid rgba(239,68,68,0.15)",
+              borderRadius: 8,
+              padding: "10px 14px",
+              fontSize: 11, color: "#ef4444",
+              marginBottom: 20, lineHeight: 1.6,
+            }}>
+              ⚠️ This is the only time the password will be shown. Copy it now.
+            </div>
+
+            <button
+              onClick={() => setCredentials(null)}
+              style={{
+                width: "100%", padding: "10px",
+                background: "linear-gradient(135deg, rgba(20,184,166,0.9), rgba(20,184,166,0.7))",
+                border: "none", borderRadius: 8,
+                color: "#0D1117", fontFamily: "monospace",
+                fontWeight: 700, fontSize: 12,
+                cursor: "pointer", letterSpacing: "0.08em",
+              }}
+            >
+              $ i have saved the credentials
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
+);
 }
 
 export default AdminAccessPanel;

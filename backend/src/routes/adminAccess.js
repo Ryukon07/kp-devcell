@@ -2,18 +2,15 @@ import express from 'express'
 import admin from 'firebase-admin'
 import Member from '../models/Member.js'
 import verifyToken from '../middleware/auth.js'
-import sendAdminInvite from '../utils/sendEmail.js'
 
 const router = express.Router()
 
-// Helper — generate email from name
 const generateEmail = (name) => {
   const cleaned = name.toLowerCase().replace(/\s+/g, '.')
   const random = Math.floor(1000 + Math.random() * 9000)
   return `${cleaned}.${random}@kpdevcell.admin`
 }
 
-// Helper — generate random password
 const generatePassword = () => {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
   let password = ''
@@ -23,7 +20,6 @@ const generatePassword = () => {
   return password
 }
 
-// GET all members with their admin status
 router.get('/', verifyToken, async (req, res) => {
   try {
     const members = await Member.find().select('name role batch photo_url firebaseUid hasAdminAccess adminEmail')
@@ -33,7 +29,6 @@ router.get('/', verifyToken, async (req, res) => {
   }
 })
 
-// POST — give admin access to a member
 router.post('/give/:memberId', verifyToken, async (req, res) => {
   try {
     const member = await Member.findById(req.params.memberId)
@@ -43,49 +38,38 @@ router.post('/give/:memberId', verifyToken, async (req, res) => {
     const generatedEmail = generateEmail(member.name)
     const generatedPassword = generatePassword()
 
-    // Step 1 — try sending email FIRST before creating anything
-    try {
-  await sendAdminInvite({
-    toEmail: req.body.personalEmail,
-    name: member.name,
-    generatedEmail,
-    generatedPassword
-  })
-} catch (emailErr) {
-  console.error('❌ Email sending failed:', emailErr.message)
-  return res.status(400).json({ message: emailErr.message })
-}
-
-    // Step 2 — only create Firebase account if email succeeded
     const firebaseUser = await admin.auth().createUser({
       email: generatedEmail,
       password: generatedPassword,
       displayName: member.name
     })
 
-    // Step 3 — only update DB if Firebase succeeded
     member.hasAdminAccess = true
     member.firebaseUid = firebaseUser.uid
     member.adminEmail = generatedEmail
     await member.save()
 
-    res.json({ message: `Admin access given to ${member.name}` })
+    // Return credentials to frontend
+    res.json({
+      message: `Admin access given to ${member.name}`,
+      credentials: {
+        email: generatedEmail,
+        password: generatedPassword
+      }
+    })
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 })
 
-// POST — remove admin access from a member
 router.post('/remove/:memberId', verifyToken, async (req, res) => {
   try {
     const member = await Member.findById(req.params.memberId)
     if (!member) return res.status(404).json({ message: 'Member not found' })
     if (!member.hasAdminAccess) return res.status(400).json({ message: 'Member does not have admin access' })
 
-    // Delete Firebase account completely
     await admin.auth().deleteUser(member.firebaseUid)
 
-    // Clean up member record in DB
     member.hasAdminAccess = false
     member.firebaseUid = ''
     member.adminEmail = ''
