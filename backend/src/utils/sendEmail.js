@@ -1,43 +1,24 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  logger: true,
-  debug: true
-})
-
-// This runs when backend starts
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ SMTP verify failed:', error.message)
-    console.error('❌ Full error:', JSON.stringify(error, null, 2))
-  } else {
-    console.log('✅ SMTP ready to send emails')
-  }
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendAdminInvite = async ({ toEmail, name, generatedEmail, generatedPassword }) => {
-  console.log('📧 Attempting to send email to:', toEmail)
-  console.log('📧 GMAIL_USER is:', process.env.GMAIL_USER)
-  console.log('📧 GMAIL_PASS is set:', !!process.env.GMAIL_PASS)
+  console.log('📧 Attempting to send via Resend to:', toEmail)
+  console.log('📧 API key set:', !!process.env.RESEND_API_KEY)
+  console.log('📧 API key starts with re_:', process.env.RESEND_API_KEY?.startsWith('re_'))
 
-  const result = await transporter.sendMail({
-    from: `"KP Dev Cell" <${process.env.GMAIL_USER}>`,
+  const result = await resend.emails.send({
+    from: 'KP Dev Cell <onboarding@resend.dev>',
     to: toEmail,
     subject: '🔐 Admin Access Granted — KP Dev Cell',
-    html: `<p>Test email — credentials will go here</p>`
+    html: `<p>Test email for <b>${name}</b></p>`
   })
 
-  console.log('✅ Email sent:', result.messageId)
+  console.log('✅ Resend result:', JSON.stringify(result, null, 2))
+
+  if (result.error) {
+    throw new Error(result.error.message || JSON.stringify(result.error))
+  }
 }
 
 export default sendAdminInvite
