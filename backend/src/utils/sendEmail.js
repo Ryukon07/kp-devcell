@@ -1,16 +1,10 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS
-  }
-})
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendAdminInvite = async ({ toEmail, name, generatedEmail, generatedPassword }) => {
-  const mailOptions = {
-    from: `"KP Dev Cell" <${process.env.GMAIL_USER}>`,
+  await resend.emails.send({
+    from: 'KP Dev Cell <onboarding@resend.dev>',
     to: toEmail,
     subject: 'You have been given admin access — KP Dev Cell',
     html: `
@@ -29,9 +23,7 @@ const sendAdminInvite = async ({ toEmail, name, generatedEmail, generatedPasswor
         <p>— KP Dev Cell Team</p>
       </div>
     `
-  }
-
-  await transporter.sendMail(mailOptions)
+  })
 }
 
 export default sendAdminInvite
