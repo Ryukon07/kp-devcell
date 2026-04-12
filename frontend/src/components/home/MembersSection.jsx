@@ -63,7 +63,7 @@ function TerminalModal({ member, onClose }) {
   `{`,
   `  "name": "${member.name || ''}",`,
   `  "role": "${member.role || ''}",`,
-  `  "team": "${member.batch || ''}",`,
+  `  "team": "${member.team || ''}",`,
   `  "bio": "${member.bio || 'No bio available'}",`,
   `  "status": "active"`,
   `}`,
@@ -354,7 +354,7 @@ function MemberCard({ member, index, onSelect }) {
             {member.role}
           </div>
           <div style={{ color: C.muted, fontSize: '10px', marginBottom: '6px' }}>
-  {member.batch}
+  {member.team}
 </div>
 
 {member.bio && (
@@ -420,6 +420,11 @@ export default function MembersSection() {
   const [filter, setFilter] = useState('all')
   const sectionRef = useRef(null)
 
+  const normalizeMember = member => ({
+    ...member,
+    team: member.team || member.batch || '',
+  })
+
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
@@ -428,7 +433,7 @@ export default function MembersSection() {
 
   useEffect(() => {
     api.get('/members')
-      .then(res => setMembers(res.data))
+      .then(res => setMembers((res.data || []).map(normalizeMember)))
       .catch(err => console.error('Failed to fetch members', err))
       .finally(() => setLoading(false))
   }, [])
@@ -439,13 +444,13 @@ export default function MembersSection() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [])
 
-  const batches = useMemo(
-    () => ['all', ...new Set(members.map(m => m.batch).filter(Boolean).sort())],
+  const teams = useMemo(
+    () => ['all', ...new Set(members.map(m => m.team).filter(Boolean).sort())],
     [members]
   )
 
   const filtered = useMemo(
-    () => (filter === 'all' ? members : members.filter(m => m.batch === filter)),
+    () => (filter === 'all' ? members : members.filter(m => m.team === filter)),
     [members, filter]
   )
 
@@ -570,15 +575,15 @@ export default function MembersSection() {
         {/* Name ticker */}
         {!loading && <NameTicker members={members} />}
 
-        {/* Batch filter */}
-        {batches.length > 2 && (
+        {/* Team filter */}
+        {teams.length > 2 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             style={{ display: 'flex', gap: '8px', marginBottom: '36px', flexWrap: 'wrap' }}
           >
-            {batches.map(b => (
+            {teams.map(b => (
               <motion.button
                 key={b}
                 onClick={() => setFilter(b)}
