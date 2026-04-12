@@ -184,7 +184,7 @@ function TeamCard({ name, role, year, stack, highlight, github, linkedin, emoji 
 // ── Team Data ─────────────────────────────────────────────────────
 const TEAM = [
   {
-    name: 'Ananya Sharma',
+    name: 'Member 1',
     role: 'Lead · Full Stack',
     year: 'B.Tech 3rd Year',
     stack: 'React · Node.js · PostgreSQL',
@@ -194,7 +194,7 @@ const TEAM = [
     emoji: '👩‍💻',
   },
   {
-    name: 'Rahul Verma',
+    name: 'Member 2',
     role: 'Backend Lead',
     year: 'B.Tech 3rd Year',
     stack: 'Python · Django · MongoDB',
@@ -204,7 +204,7 @@ const TEAM = [
     emoji: '👨‍💻',
   },
   {
-    name: 'Priya Singh',
+    name: 'Member 3',
     role: 'Frontend Dev',
     year: 'B.Tech 2nd Year',
     stack: 'React · TypeScript · Tailwind',
@@ -214,7 +214,7 @@ const TEAM = [
     emoji: '👩‍🎨',
   },
   {
-    name: 'Arjun Patel',
+    name: 'Member 4',
     role: 'DevOps Lead',
     year: 'B.Tech 4th Year',
     stack: 'Docker · K8s · AWS',
@@ -224,7 +224,7 @@ const TEAM = [
     emoji: '🧑‍💻',
   },
   {
-    name: 'Sneha Gupta',
+    name: 'Member 5',
     role: 'ML Engineer',
     year: 'B.Tech 3rd Year',
     stack: 'Python · TensorFlow · PyTorch',

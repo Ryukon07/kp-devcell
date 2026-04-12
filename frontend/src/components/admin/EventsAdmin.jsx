@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { auth } from '../../firebase.js'
 import api from '../../api.js'
 import toast from 'react-hot-toast'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 const emptyForm = {
   title: '',
@@ -467,6 +469,54 @@ function EventsAdmin() {
           transition: all 0.15s;
         }
         .term-btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: #9CA3AF; }
+
+        .dp-input {
+  background-color: rgba(13,17,23,0.8);
+  border: 1px solid rgba(35,43,58,0.95);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dp-calendar {
+  background-color: #0D1117 !important;
+  border: 1px solid rgba(20,184,166,0.25) !important;
+  font-family: "Fira Code", "Cascadia Code", monospace !important;
+  border-radius: 10px !important;
+}
+.react-datepicker__header {
+  background-color: rgba(20,184,166,0.08) !important;
+  border-bottom: 1px solid rgba(20,184,166,0.15) !important;
+  color: #e2e8f0 !important;
+}
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  color: #14B8A6 !important;
+}
+.react-datepicker__day {
+  color: #9CA3AF !important;
+}
+.react-datepicker__day:hover {
+  background-color: rgba(20,184,166,0.15) !important;
+  color: #e2e8f0 !important;
+  border-radius: 6px !important;
+}
+.react-datepicker__day--selected {
+  background-color: #14B8A6 !important;
+  color: #0D1117 !important;
+  border-radius: 6px !important;
+}
+.react-datepicker__day--today {
+  color: #FFBD2E !important;
+  font-weight: bold !important;
+}
+.react-datepicker__navigation-icon::before {
+  border-color: #14B8A6 !important;
+}
       `}</style>
 
       {/* ── IDE-style 2-panel layout (mirrors MembersAdmin) ── */}
@@ -652,15 +702,27 @@ function EventsAdmin() {
                     required
                     placeholder='"Hackathon 2025"'
                   />
-                  <TermInput
-                    label="date"
-                    name="date"
-                    type="date"
-                    value={form.date}
-                    onChange={handleChange}
-                    required
-                    placeholder=""
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+  <label style={{
+    fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+    color: '#4B5563', fontFamily: '"Fira Code", "Cascadia Code", monospace',
+  }}>
+    <span style={{ color: '#374151' }}>const </span>
+    <span style={{ color: '#9CA3AF' }}>date</span>
+    <span style={{ color: '#374151' }}> =</span>
+  </label>
+  <DatePicker
+    selected={form.date ? new Date(form.date) : null}
+    onChange={(date) => {
+      const val = date ? `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}` : ''
+      setForm(prev => ({ ...prev, date: val }))
+    }}
+    dateFormat="yyyy-MM-dd"
+    placeholderText="pick a date"
+    className="dp-input"
+    calendarClassName="dp-calendar"
+  />
+</div>
                   <TermInput
                     label="image_url"
                     name="image_url"

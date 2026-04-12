@@ -261,19 +261,19 @@ export default function About() {
             {/* Right: scrambled stat cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <ScrambleStatCard
-                value={50}  label="Members"          suffix="+"
+                value={20}  label="Members"          suffix="+"
                 sectionRef={sectionRef} scrollStart={0.1} scrollEnd={0.45}
               />
               <ScrambleStatCard
-                value={12}  label="Projects built"   suffix="+"
+                value={100}  label="Alumini"   suffix="+"
                 sectionRef={sectionRef} scrollStart={0.2} scrollEnd={0.5}
               />
               <ScrambleStatCard
-                value={20}  label="Sessions held"    suffix="+"
+                value={10}  label="Sessions held"    suffix="+"
                 sectionRef={sectionRef} scrollStart={0.3} scrollEnd={0.55}
               />
               <ScrambleStatCard
-                value={3}   label="Semesters active" suffix=""
+                value={4}   label="Projects" suffix=""
                 sectionRef={sectionRef} scrollStart={0.4} scrollEnd={0.6}
               />
             </div>

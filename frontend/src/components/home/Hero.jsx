@@ -674,7 +674,7 @@ export default function Hero() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
-              Fuck OFF.
+              Just Code.
             </span>
           </motion.h1>
 

@@ -167,7 +167,7 @@ function TopBar({ activeTab, onLogout, isMobile, onMenuToggle, sidebarOpen }) {
         >
           {TABS.find(t => t.id === activeTab)?.cmd}
         </span>
-        {!isMobile && <Cursor />}
+        {/* {!isMobile && <Cursor />} */}
       </div>
 
       <div style={{ flex: 1 }} />
