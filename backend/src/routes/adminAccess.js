@@ -45,15 +45,16 @@ router.post('/give/:memberId', verifyToken, async (req, res) => {
 
     // Step 1 — try sending email FIRST before creating anything
     try {
-      await sendAdminInvite({
-        toEmail: req.body.personalEmail,
-        name: member.name,
-        generatedEmail,
-        generatedPassword
-      })
-    } catch (emailErr) {
-      return res.status(400).json({ message: 'Failed to send email — check the email address and try again' })
-    }
+  await sendAdminInvite({
+    toEmail: req.body.personalEmail,
+    name: member.name,
+    generatedEmail,
+    generatedPassword
+  })
+} catch (emailErr) {
+  console.error('❌ Email sending failed:', emailErr.message)
+  return res.status(400).json({ message: emailErr.message })
+}
 
     // Step 2 — only create Firebase account if email succeeded
     const firebaseUser = await admin.auth().createUser({

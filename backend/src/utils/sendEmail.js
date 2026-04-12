@@ -98,9 +98,10 @@ const sendAdminInvite = async ({ toEmail, name, generatedEmail, generatedPasswor
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || 'Failed to send email')
-  }
+  const error = await response.json()
+  console.error('❌ Brevo API error:', JSON.stringify(error, null, 2))
+  throw new Error(error.message || JSON.stringify(error))
+}
 }
 
 export default sendAdminInvite
