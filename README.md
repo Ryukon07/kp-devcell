@@ -1,54 +1,47 @@
 # KP Dev Cell — Official Website
 
-> The official website of **Kammand Prompt Club**, the developer club of IIT Mandi.  
-> Built by students, for students. 🚀
+The official site of **Kammand Prompt Club**, IIT Mandi's developer club.
+
+🌐 **Live:** [kp-devcell.vercel.app](https://kp-devcell.vercel.app)  
+🔐 **Admin:** [kp-devcell.vercel.app/admin](https://kp-devcell.vercel.app/admin)
 
 ---
 
-## 🖥️ Live Site
+## What's this?
 
-| Service | URL |
-|---|---|
-| Frontend | Deployed on Vercel |
-| Backend API | Deployed on Render |
+This is the full-stack web app we built for KP Dev Cell. It's not just a landing page — there's a real backend, auth, and an admin dashboard that club leads actually use day-to-day.
 
----
-
-## 📖 What Is This?
-
-This is the full-stack web application for KP Dev Cell. It's not just a static club page — it has a real backend, a login system, and an admin panel that we actively use to manage club content.
-
-**What the site does:**
-- Showcases the club, the team, and our projects
-- Lists upcoming and past events with filtering
-- Hosts study resources (PDFs, slides) organized by category
-- Shows live announcements on the homepage
-- Has a protected admin dashboard for club leads to manage everything
+The site lets us:
+- Show off the club, the team, and what we've built
+- Post and filter events (upcoming, past, happening today)
+- Share study resources like PDFs and slides, organized neatly
+- Push live announcements to the homepage
+- Manage everything through a protected admin panel
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-### Frontend
-- **React** — UI framework, functional components + hooks throughout
-- **React Router** — client-side routing with protected and public-only route guards
-- **Framer Motion** — animations (scroll-linked effects, spring transitions, card stacking)
-- **Canvas 2D API** — Matrix Rain on the homepage, floating code particles on the login page
-- **Fira Code / Inter** — typography (monospace for the terminal look, Inter for readable text)
+**Frontend**
+- React (functional components, hooks)
+- React Router (with protected + public-only route guards)
+- Framer Motion (spring physics, scroll-linked animations, card stacking)
+- Canvas 2D API (Matrix Rain on the homepage, floating code tokens on login)
+- Fira Code + Inter (monospace for the terminal feel, Inter for readability)
 
-### Backend
-- **Node.js + Express** — REST API for events, members, and announcements
-- **MongoDB** — primary database
+**Backend**
+- Node.js + Express (REST API)
+- MongoDB + Mongoose
 
-### Auth & Infra
-- **Firebase Authentication** — email/password login, sessions, re-authentication
-- **Docker** — containerisation for consistent environments
-- **Vercel** — frontend hosting (auto-deploys from GitHub)
-- **Render** — backend API hosting (auto-deploys from GitHub)
+**Auth & Infra**
+- Firebase Authentication (email/password, sessions, re-auth)
+- Docker (containerisation)
+- Vercel (frontend hosting, auto-deploys from GitHub)
+- Render (backend hosting, auto-deploys from GitHub)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 KP-DEVCELL/
@@ -80,66 +73,61 @@ KP-DEVCELL/
 
 ---
 
-## ✨ Features & Design
+## Pages & Features
 
-Every page has its own loading animation and unique layout, while sharing the same dark terminal-inspired design language.
+Every page has its own loading animation, but they all share the same dark, terminal-inspired look.
 
-### 🏠 Homepage
-- Full-screen boot loader with a fake terminal session ID and step-by-step log
-- Matrix Rain canvas in the hero (falling monospace characters)
-- Live announcements floating as terminal-window cards (desktop) or a scrolling ticker (mobile)
+**Homepage**
+- Boot loader with a fake terminal session and step-by-step log
+- Matrix Rain canvas in the hero section
+- Live announcements as terminal-window cards (desktop) or a scrolling ticker (mobile)
 - Typewriter effect cycling through club mottos
-- Scroll-driven text scramble effects in the About section
-- Stat counters (members, projects, sessions) that scramble from random digits as you scroll
+- Scroll-triggered text scramble effects and stat counters (members, projects, sessions)
 - 3D-stacked project cards that flip on scroll
 
-### 👥 Core Team
+**Core Team**
 - Member cards styled as macOS terminal windows
-- Desktop: cards stacked at angles, fan out on hover with spring-physics animations
-- Mobile: horizontal swipe scroll with snap alignment
+- Desktop: cards fan out with spring-physics on hover
+- Mobile: horizontal swipe scroll with snap
 
-### 📅 Events
+**Events**
 - Radar-style boot loader (unique to this page)
 - Header types out `ls -la ./events` on load
-- Events shown as horizontal cards with date column, pulsing status dot (upcoming/today/past)
+- Horizontal cards with a date column and a pulsing status dot (upcoming / today / past)
 - Filter tabs with live event counts
 
-### 📚 Resources
+**Resources**
 - Document-scanner boot loader animation
 - GitHub-style file explorer layout
-- Accordion folder cards with tree-connector lines inside
-- File type badges (PDF, PPT) with colour coding
+- Accordion folder cards with tree-connector lines
+- PDF and PPT badges with colour coding
 
-### 🔐 Admin Dashboard
-- Full VS Code–style layout: top bar, left EXPLORER sidebar, tab bar
-- Live clock in the top bar, `root@kp-admin` status chip
+**Admin Dashboard** *(protected — [kp-devcell.vercel.app/admin](https://kp-devcell.vercel.app/admin))*
+- VS Code–style layout: top bar, left sidebar, tab bar
+- Live clock and `root@kp-admin` status chip in the top bar
 - Manage members, events, announcements, and admin access
-- Smooth fade-slide transition when switching tabs
-- Collapsible sidebar on mobile with hamburger toggle
+- Smooth fade-slide transitions between tabs
+- Collapsible sidebar on mobile with a hamburger toggle
 
-### 🔑 Login Page
+**Login Page**
 - Background canvas with 240 floating code tokens (`const`, `async`, `===`, etc.)
 - Frosted-glass login card with a teal scanline animation
-- Custom animated logo (SVG bracket + two orbiting dots)
-- Glow-on-focus input fields
-- Dual modes: Login and Set Password, with animated transition between them
+- Custom animated SVG logo (bracket + two orbiting dots)
+- Glow-on-focus inputs
+- Login and Set Password modes with an animated transition between them
 
 ---
 
-
-
-## 🔑 Auth Flow
+## Auth Flow
 
 - `/admin` — protected route, redirects to `/login` if not authenticated
-- `/login` — public-only route, redirects to `/admin` if already logged in
-- Auth state is managed via `AuthContext` using Firebase
-- The admin panel supports password change for first-time users
+- `/login` — public-only, redirects to `/admin` if already logged in
+- Auth state managed via `AuthContext` using Firebase
+- Supports password change for first-time users
 
 ---
 
-## 👨‍💻 Built by DeCoders
-
-## 🎨 Design System
+## Design System
 
 All theme values live in `src/constants/theme.js`:
 
@@ -155,8 +143,8 @@ export const C = {
 }
 ```
 
-Typography uses **Inter** for body text and **Fira Code / Cascadia Code** for all terminal-style elements.
+Body text uses **Inter**. Everything terminal-flavoured uses **Fira Code / Cascadia Code**.
 
 ---
 
-
+Built by DeCoders — KP Dev Cell, IIT Mandi.
